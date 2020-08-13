@@ -15,3 +15,6 @@ file(GLOB_RECURSE PrinterMod_SOURCES
     )
 
 add_executable(PrinterMod ${PrinterMod_SOURCES} ${PrinterMod_HEADERS})
+target_link_libraries(PrinterMod "-lpthread")
+target_link_libraries(PrinterMod "-ldl")
+target_link_libraries(PrinterMod "-ljson-c")

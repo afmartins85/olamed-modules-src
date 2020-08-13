@@ -2,6 +2,7 @@
 #define DAPPLICATION_H
 
 #include <iostream>
+#include "printerprotocol.h"
 
 using namespace std;
 
@@ -19,6 +20,7 @@ class DApplication {
   DApplication(int argc, char* argv[]);
   DApplication(const DApplication&);
   DApplication& operator=(const DApplication&);
+  PrinterProtocol * m_ptr_Protocol;
 };
 
-#endif  // DAPPLICATION_H
+#endif

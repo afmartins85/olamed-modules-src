@@ -11,6 +11,9 @@ class PrinterProtocol : public SupplyPrinter {
  public:
   PrinterProtocol();
 
+  inline uint64_t type() { return m_type; }
+  inline void setType(const uint64_t type) { m_type = type; }
+ 
   inline string serial() const { return m_serial; }
   inline void setSerial(const string &serial) { m_serial = serial; }
 
@@ -29,16 +32,42 @@ class PrinterProtocol : public SupplyPrinter {
   inline string error() const { return m_error; }
   inline void setError(const string &error) { m_error = error; }
 
+  inline string supply_type() const { return m_supply_type; }
+  inline void setSupply_type(const string &supply_type) { m_supply_type = supply_type; }
+  
+  inline double cyan_level() { return m_cyan_level; }
+  inline void setCyan_level(double cyan_level) { m_cyan_level = cyan_level; }
+/*  
+  inline uint64_t magenta_level() const { return m_magenta_level; }
+  inline void setMagenta_level(const uint64_t &magenta_level) { m_magenta_level = magenta_level; }
+  
+  inline uint64_t yellow_level() const { return m_yellow_level; }
+  inline void setYellow_level(const uint64_t &yellow_level) { m_yellow_level = yellow_level; }
+
+  inline uint64_t black_level() const { return m_black_level; }
+  inline void setBlack_level(const uint64_t &black_level) { m_black_level = black_level; }
+*/  
   void create_json_object(struct json_object *jobj, const char *a, void *b, int variable_b_type);
   void prepare_json_object(void);
 
  private:
+  uint64_t m_type;
   string m_serial;
   string m_description;
   bool m_connected;
   uint64_t m_prints;
   string m_state;
   string m_error;
+  string m_supply_type;
+
+  double m_cyan_level;
+  //uint64_t m_magenta_level;
+  //uint64_t m_yellow_level;
+  //uint64_t m_black_level;
+
+
+
+
   enum { TYPE_NULL, TYPE_BOOLEAN, TYPE_DOUBLE, TYPE_INT, TYPE_STRING, TYPE_OBJECT, TYPE_ARRAY };
 };
 

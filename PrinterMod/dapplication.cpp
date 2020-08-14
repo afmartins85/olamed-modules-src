@@ -64,11 +64,13 @@ void DApplication::exec() {
   this->m_ptr_Protocol->setState("Lexmark Laser, Mono, MX421ADE");
   this->m_ptr_Protocol->setError("no paper");
   this->m_ptr_Protocol->setSupply_type("tonner");
-  //  this->m_ptr_Protocol->setCyan_level(reinterpret_cast<double*>(a));
+  this->m_ptr_Protocol->setCyan_level(a);
   this->m_ptr_Protocol->setMagenta_level(98.89);
+  this->m_ptr_Protocol->setYellow_level(88.00);
+  this->m_ptr_Protocol->setBlack_level(23.00);
+
   //  this->m_ptr_Protocol->setYellow_level(&c);
   //  this->m_ptr_Protocol->setBlack_level(&d);
-
   this->m_ptr_Protocol->prepare_json_object();
 
   while (1) {

@@ -4,6 +4,7 @@
 #include "supplyprinter.h"
 #include <ctype.h>
 #include <iostream>
+#include <json-c/json.h>
 
 using namespace std;
 
@@ -64,6 +65,10 @@ class PrinterProtocol : public SupplyPrinter {
   double m_magenta_level;
   double m_yellow_level;
   double m_black_level;
+
+  struct json_object *jobj_actual;
+  struct json_object *jobj_previous;
+
 
   enum { TYPE_NULL, TYPE_BOOLEAN, TYPE_DOUBLE, TYPE_INT, TYPE_STRING, TYPE_OBJECT, TYPE_ARRAY };
 };

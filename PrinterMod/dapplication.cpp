@@ -71,6 +71,9 @@ void DApplication::exec() {
 
   //  this->m_ptr_Protocol->setYellow_level(&c);
   //  this->m_ptr_Protocol->setBlack_level(&d);
+
+  this->m_ptr_Protocol->prepare_json_object();
+
   this->m_ptr_Protocol->prepare_json_object();
 
   while (1) {

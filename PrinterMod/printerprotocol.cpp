@@ -6,47 +6,43 @@
  * @brief PrinterProtocol::PrinterProtocol
  */
 PrinterProtocol::PrinterProtocol() {
-
   jobj_actual = json_object_new_object();
   jobj_previous = json_object_new_object();
-
 }
 
 void PrinterProtocol::create_json_object(struct json_object *jobj, const char *a, void *b, int variable_b_type) {
-
   switch (variable_b_type) {
-    case TYPE_NULL:
+    case Type::Null:
       break;
 
-    case TYPE_BOOLEAN:
+    case Type::Boolean:
       json_object_object_add(jobj, a, json_object_new_boolean((bool)b));
       break;
 
-    case TYPE_DOUBLE: {
+    case Type::Double: {
       // json_object_object_add(jobj, a, json_object_new_double(*((double *)(b))));
       double x = *((double *)b);
       json_object_object_add(jobj, a, json_object_new_double(x));
       break;
     }
 
-    case TYPE_INT:
+    case Type::Int:
       json_object_object_add(jobj, a, json_object_new_int(static_cast<int>(reinterpret_cast<intptr_t>(b))));
       break;
 
-    case TYPE_STRING:
+    case Type::String:
       json_object_object_add(jobj, a, json_object_new_string((const char *)b));
       break;
 
-    case TYPE_OBJECT:
+    case Type::Object:
       break;
 
-    case TYPE_ARRAY:
+    case Type::Array:
       break;
   }
 }
 
 void PrinterProtocol::prepare_json_object(void) {
-
   /* PrintProtocol JSON:
 
     "type": 2,
@@ -64,22 +60,21 @@ void PrinterProtocol::prepare_json_object(void) {
     "date": "2020-08-10T20:00:31Z"
 */
 
-  create_json_object(jobj_actual, "type", (void *)type(), TYPE_INT);
-  create_json_object(jobj_actual, "serial", (void *)serial().c_str(), TYPE_STRING);
-  create_json_object(jobj_actual, "description", (void *)description().c_str(), TYPE_STRING);
-  create_json_object(jobj_actual, "connected", (void *)connected(), TYPE_BOOLEAN);
-  create_json_object(jobj_actual, "prints", (void *)prints(), TYPE_INT);
-  create_json_object(jobj_actual, "state", (void *)state().c_str(), TYPE_STRING);
-  create_json_object(jobj_actual, "error", (void *)error().c_str(), TYPE_STRING);
-  create_json_object(jobj_actual, "supply_type", (void *)supply_type().c_str(), TYPE_STRING);
-  create_json_object(jobj_actual, "cyan_level", &m_cyan_level, TYPE_DOUBLE);
-  create_json_object(jobj_actual, "magenta_level", &m_magenta_level, TYPE_DOUBLE);
-  create_json_object(jobj_actual, "yellow_level", &m_yellow_level, TYPE_DOUBLE);
-  create_json_object(jobj_actual, "black_level", &m_black_level, TYPE_DOUBLE);
+  create_json_object(jobj_actual, "type", (void *)type(), Type::Int);
+  create_json_object(jobj_actual, "serial", (void *)serial().c_str(), Type::String);
+  create_json_object(jobj_actual, "description", (void *)description().c_str(), Type::String);
+  create_json_object(jobj_actual, "connected", (void *)connected(), Type::Boolean);
+  create_json_object(jobj_actual, "prints", (void *)prints(), Type::Int);
+  create_json_object(jobj_actual, "state", (void *)state().c_str(), Type::String);
+  create_json_object(jobj_actual, "error", (void *)error().c_str(), Type::String);
+  create_json_object(jobj_actual, "supply_type", (void *)supply_type().c_str(), Type::String);
+  create_json_object(jobj_actual, "cyan_level", &m_cyan_level, Type::Double);
+  create_json_object(jobj_actual, "magenta_level", &m_magenta_level, Type::Double);
+  create_json_object(jobj_actual, "yellow_level", &m_yellow_level, Type::Double);
+  create_json_object(jobj_actual, "black_level", &m_black_level, Type::Double);
 
-  if(json_object_equal(jobj_actual, jobj_previous) != 1) {
-
-    //Copy jobj_actual to jobj_previous
+  if (json_object_equal(jobj_actual, jobj_previous) != 1) {
+    // Copy jobj_actual to jobj_previous
     jobj_previous = json_tokener_parse(json_object_get_string(jobj_actual));
 
     cout << "jobj_previous from str:" << endl;

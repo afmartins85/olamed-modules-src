@@ -87,10 +87,19 @@ void PrinterProtocol::prepare_json_object(void) {
     cout << json_object_to_json_string_ext(jobj_previous, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY) << endl;
     cout << "---" << endl;
 
+    //cout << "jobj_actual from str:" << endl;
+    //cout << "---" << endl;
+    //cout << json_object_to_json_string_ext(jobj_actual, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY) << endl;
+    //cout << "---" << endl;
+
+    setJson_message(json_object_to_json_string_ext(jobj_actual, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+
     cout << "jobj_actual from str:" << endl;
     cout << "---" << endl;
-    cout << json_object_to_json_string_ext(jobj_actual, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY) << endl;
+    cout << m_json_message << endl;
     cout << "---" << endl;
+
+
   }
   else {
     cout << "---" << endl;

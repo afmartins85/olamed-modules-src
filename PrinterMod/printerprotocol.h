@@ -48,6 +48,9 @@ class PrinterProtocol : public SupplyPrinter {
   inline double black_level() const { return m_black_level; }
   inline void setBlack_level(const double &black_level) { m_black_level = black_level; }
 
+  inline string json_message() const { return m_json_message; }
+  inline void setJson_message (const string &json_message) { m_json_message = json_message; }
+  
   void create_json_object(struct json_object *jobj, const char *a, void *b, int variable_b_type);
   void prepare_json_object(void);
 
@@ -66,9 +69,10 @@ class PrinterProtocol : public SupplyPrinter {
   double m_yellow_level;
   double m_black_level;
 
+  string m_json_message;
+
   struct json_object *jobj_actual;
   struct json_object *jobj_previous;
-
 
   enum { TYPE_NULL, TYPE_BOOLEAN, TYPE_DOUBLE, TYPE_INT, TYPE_STRING, TYPE_OBJECT, TYPE_ARRAY };
 };

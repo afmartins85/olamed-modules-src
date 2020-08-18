@@ -98,10 +98,7 @@ void PrinterProtocol::prepare_json_object(void) {
     cout << "---" << endl;
     cout << m_json_message << endl;
     cout << "---" << endl;
-
-
-  }
-  else {
+  } else {
     cout << "---" << endl;
     cout << "jobj_actual and job_actual are equals:" << endl;
     cout << "---" << endl;

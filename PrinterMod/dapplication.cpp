@@ -7,7 +7,10 @@ DApplication *DApplication::instance_ = nullptr;
 /**
  * @brief DApplication::DApplication
  */
-DApplication::DApplication() { m_ptr_Protocol = new PrinterProtocol; }
+DApplication::DApplication() {
+  this->m_ptr_Protocol = new PrinterProtocol;
+  this->m_netSNMP = new NetSNMP;
+}
 
 /**
  * @brief DApplication::DApplication
@@ -17,7 +20,8 @@ DApplication::DApplication() { m_ptr_Protocol = new PrinterProtocol; }
 DApplication::DApplication(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
-  m_ptr_Protocol = new PrinterProtocol;
+  this->m_ptr_Protocol = new PrinterProtocol;
+  this->m_netSNMP = new NetSNMP;
 }
 
 /**
@@ -56,6 +60,13 @@ void DApplication::exec() {
   b = 98.89;
   c = 88.00;
   d = 23.00;
+
+  if (this->m_netSNMP->openSession() == true) {
+    LOG_F(INFO, "net-SNMP open session is done!!!");
+    this->m_netSNMP->readIodTest();
+  } else {
+    LOG_F(ERROR, "Failure in open session net-SNMP");
+  }
 
   this->m_ptr_Protocol->setType(2);
   this->m_ptr_Protocol->setSerial("7558100415344-106-0");

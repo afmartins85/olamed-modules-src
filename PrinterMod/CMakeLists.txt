@@ -5,6 +5,12 @@ project(PrinterMod LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(cmake/Utils.cmake)
+
+#Here we add a Cmake Module abble to find GSOAP on your system, and find it
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+find_package(NetSNMP)
 find_package(PkgConfig)
 
 file(GLOB_RECURSE PrinterMod_HEADERS
@@ -54,8 +60,15 @@ else()
         set(APPS_LINK_LIBS json-c)
 endif()
 
+if (NETSNMP_FOUND)
+    message(STATUS "net-SNMP found")
+    include_directories(${NETSNMP_INCLUDE_DIR})
+else()
+    message(ERROR "Failure on find net-SNMP!!!")
+endif()
 
 add_executable(PrinterMod ${PrinterMod_SOURCES} ${PrinterMod_HEADERS})
 target_link_libraries(PrinterMod ${APPS_LINK_LIBS})
+target_link_libraries(PrinterMod ${NETSNMP_LIBRARY})
 target_link_libraries(PrinterMod "-lpthread")
 target_link_libraries(PrinterMod "-ldl")

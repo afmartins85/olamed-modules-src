@@ -74,7 +74,7 @@ class PrinterProtocol : public SupplyPrinter {
   struct json_object *jobj_actual;
   struct json_object *jobj_previous;
 
-  enum { TYPE_NULL, TYPE_BOOLEAN, TYPE_DOUBLE, TYPE_INT, TYPE_STRING, TYPE_OBJECT, TYPE_ARRAY };
+  enum Type : int { Null, Boolean, Double, Int, String, Object, Array };
 };
 
 #endif  // PRINTERPROTOCOL_H

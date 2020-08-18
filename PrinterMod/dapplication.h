@@ -4,6 +4,8 @@
 #include "netsnmp.h"
 #include "printerprotocol.h"
 #include <iostream>
+#include <string>
+#include "socket.h"
 
 using namespace std;
 
@@ -23,6 +25,7 @@ class DApplication {
   DApplication& operator=(const DApplication&);
   PrinterProtocol* m_ptr_Protocol;
   NetSNMP* m_netSNMP;
+  Socket *m_ptr_Socket;
 };
 
 #endif

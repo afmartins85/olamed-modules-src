@@ -1,8 +1,9 @@
 #ifndef DAPPLICATION_H
 #define DAPPLICATION_H
 
-#include <iostream>
+#include "netsnmp.h"
 #include "printerprotocol.h"
+#include <iostream>
 
 using namespace std;
 
@@ -20,7 +21,8 @@ class DApplication {
   DApplication(int argc, char* argv[]);
   DApplication(const DApplication&);
   DApplication& operator=(const DApplication&);
-  PrinterProtocol * m_ptr_Protocol;
+  PrinterProtocol* m_ptr_Protocol;
+  NetSNMP* m_netSNMP;
 };
 
 #endif

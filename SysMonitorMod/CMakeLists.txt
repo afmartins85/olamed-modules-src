@@ -5,7 +5,13 @@ project(SysMonitorMod LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(cmake/Utils.cmake)
+
+#Here we add a Cmake Module abble to find GSOAP on your system, and find it
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 find_package(PkgConfig)
+find_package( Sensors REQUIRED )
 
 file(GLOB_RECURSE SysMonitorMod_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/*.h
@@ -55,6 +61,7 @@ else()
 endif()
 
 add_executable(SysMonitorMod ${SysMonitorMod_SOURCES} ${SysMonitorMod_HEADERS})
+target_link_libraries (SysMonitorMod  ${SENSORS_LIBRARIES})
 target_link_libraries(SysMonitorMod ${APPS_LINK_LIBS})
 target_link_libraries(SysMonitorMod "-lpthread")
 target_link_libraries(SysMonitorMod "-ldl")

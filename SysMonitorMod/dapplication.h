@@ -1,6 +1,7 @@
 #ifndef DAPPLICATION_H
 #define DAPPLICATION_H
 
+#include "machineinfo.h"
 #include <iostream>
 
 using namespace std;
@@ -19,6 +20,7 @@ class DApplication {
   DApplication(int argc, char* argv[]);
   DApplication(const DApplication&);
   DApplication& operator=(const DApplication&);
+  MachineInfo* m_ptr_MachineInfo;
 };
 
 #endif

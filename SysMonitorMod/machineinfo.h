@@ -1,6 +1,7 @@
 #ifndef MACHINEINFO_H
 #define MACHINEINFO_H
 
+#include <time.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -37,12 +38,16 @@ class MachineInfo {
 
     inline unsigned long flash_total() { return m_flash_total; }
     inline void setFlash_total(unsigned long flash_total) { m_flash_total = flash_total; }
-    
+   
+    inline string datetime() { return m_datetime; }
+    inline void setDatetime(string datetime) { m_datetime = datetime; } 
+
     void Temperature(void);
     void RAM_MemoryTotalVerify(void);
     void RAM_MemoryFreeVerify(void);
     void FLASH_MemoryTotalVerify(void);
     void FLASH_MemoryFreeVerify(void);
+    void DateTime(void);
 
   private:
   
@@ -53,12 +58,7 @@ class MachineInfo {
     unsigned long m_flash_avaliable;
     unsigned long m_flash_total;
     string m_saveFilesPath; 
+    string m_datetime;
 };
-
-
-
-
-
-
 
 #endif // MACHINEINFO_H

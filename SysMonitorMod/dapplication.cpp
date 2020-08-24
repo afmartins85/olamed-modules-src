@@ -9,6 +9,8 @@ DApplication *DApplication::instance_ = nullptr;
  */
 DApplication::DApplication() {
   this->m_ptr_MachineInfo = new MachineInfo;
+  this->m_ptr_MachineProtocol = new MachineProtocol;
+  this->m_ptr_Socket = new Socket;
 }
 
 /**
@@ -20,6 +22,8 @@ DApplication::DApplication(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
   this->m_ptr_MachineInfo = new MachineInfo;
+  this->m_ptr_MachineProtocol = new MachineProtocol;
+  this->m_ptr_Socket = new Socket;
 }
 
 /**
@@ -75,6 +79,29 @@ void DApplication::exec() {
   this->m_ptr_MachineInfo->FLASH_MemoryTotalVerify();
   cout << " FLASH total: ";
   cout << this->m_ptr_MachineInfo->flash_total() << endl;
+
+  this->m_ptr_MachineInfo->DateTime();
+
+  this->m_ptr_MachineProtocol->setType(3);
+  this->m_ptr_MachineProtocol->setTotal_disk(this->m_ptr_MachineInfo->flash_avaliable());
+  this->m_ptr_MachineProtocol->setFree_disk(this->m_ptr_MachineInfo->flash_total());
+  this->m_ptr_MachineProtocol->setTotal_ram(this->m_ptr_MachineInfo->ram_avaliable());
+  this->m_ptr_MachineProtocol->setFree_ram(this->m_ptr_MachineInfo->ram_total());
+  this->m_ptr_MachineProtocol->setDate(this->m_ptr_MachineInfo->datetime());
+
+  this->m_ptr_MachineProtocol->prepare_json_object();
+  
+  this->m_ptr_Socket->setPort(8080);
+  this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
+  cout << "DApplication::exec():" << endl;
+
+  cout << "((this->m_ptr_MachineProtocol->json_message()).c_str()):" << endl;
+  cout << ((this->m_ptr_MachineProtocol->json_message()).c_str()) << endl;
+  this->m_ptr_Socket->setMessage(const_cast<char*>((this->m_ptr_MachineProtocol->json_message()).c_str()));
+  cout << "this->m_ptr_Socket->message():" << endl;
+  cout << this->m_ptr_Socket->message() << endl;
+ 
+  this->m_ptr_Socket->Client();
 
   while (1) {
   }

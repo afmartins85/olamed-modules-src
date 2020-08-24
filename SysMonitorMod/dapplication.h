@@ -1,8 +1,11 @@
 #ifndef DAPPLICATION_H
 #define DAPPLICATION_H
 
-#include "machineinfo.h"
 #include <iostream>
+#include <string.h>
+#include "socket.h"
+#include "machineinfo.h"
+#include "machineprotocol.h"
 
 using namespace std;
 
@@ -21,6 +24,8 @@ class DApplication {
   DApplication(const DApplication&);
   DApplication& operator=(const DApplication&);
   MachineInfo* m_ptr_MachineInfo;
+  MachineProtocol* m_ptr_MachineProtocol;
+  Socket* m_ptr_Socket;
 };
 
 #endif

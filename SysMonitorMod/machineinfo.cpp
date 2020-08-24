@@ -92,3 +92,34 @@ void MachineInfo::FLASH_MemoryTotalVerify(void) {
   }
 }
 
+void MachineInfo::DateTime(void) {
+
+  struct tm *date_time;
+  time_t seconds;
+
+  time(&seconds);
+  date_time = localtime(&seconds);
+
+  cout << " Day....: "; cout << date_time->tm_mday << endl;
+  cout << " Mouth..: "; cout << date_time->tm_mon+1 << endl;
+  cout << " Year...: "; cout << date_time->tm_year+1900 << endl;
+  cout << " Hour...: "; cout << date_time->tm_hour << endl;
+  cout << " Minute.: "; cout << date_time->tm_min << endl;
+  cout << " Second.: "; cout << date_time->tm_sec << endl;
+
+  m_datetime = to_string(date_time->tm_year+1900) +
+              '-' +
+              to_string(date_time->tm_mon+1) +
+              '-' +
+              to_string(date_time->tm_mday) +
+              'T' +
+              to_string(date_time->tm_hour) +
+              ':' +
+              to_string(date_time->tm_min) +
+              ':' +
+              to_string(date_time->tm_sec) +
+              'Z';
+
+  cout << m_datetime << endl;               
+}
+

@@ -5,6 +5,19 @@ project(SysMonitorMod LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(PROJECT_VERSION_MAJOR "0")
+set(PROJECT_VERSION_MINOR "1")
+set(PROJECT_VERSION_PATCH "0")
+set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+
+include(CheckSymbolExists)
+include(CheckIncludeFile)
+include(CheckIncludeFiles)
+include(CheckCSourceCompiles)
+include(CheckTypeSize)
+include(CPack)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 include(cmake/Utils.cmake)
 
 #Here we add a Cmake Module abble to find GSOAP on your system, and find it
@@ -13,10 +26,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(PkgConfig)
 find_package( Sensors REQUIRED )
 
-file(GLOB_RECURSE SysMonitorMod_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/*.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
-    )
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE SysMonitorMod_SOURCES
     ${SysMonitorMod_SOURCE_DIR}/*.cpp
@@ -60,8 +70,31 @@ else()
         set(APPS_LINK_LIBS json-c)
 endif()
 
-add_executable(SysMonitorMod ${SysMonitorMod_SOURCES} ${SysMonitorMod_HEADERS})
+add_executable(SysMonitorMod ${SysMonitorMod_SOURCES})
 target_link_libraries (SysMonitorMod  ${SENSORS_LIBRARIES})
 target_link_libraries(SysMonitorMod ${APPS_LINK_LIBS})
 target_link_libraries(SysMonitorMod "-lpthread")
 target_link_libraries(SysMonitorMod "-ldl")
+
+set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+        OWNER_READ
+        OWNER_WRITE
+        OWNER_EXECUTE
+        GROUP_READ
+        GROUP_EXECUTE
+        WORLD_READ
+        WORLD_EXECUTE
+   )
+
+if (UNIX OR MINGW OR CYGWIN)
+    SET(prefix ${CMAKE_INSTALL_PREFIX})
+    # exec_prefix is prefix by default and CMake does not have the
+    # concept.
+    SET(exec_prefix ${CMAKE_INSTALL_PREFIX})
+    SET(libdir ${CMAKE_INSTALL_FULL_LIBDIR})
+    SET(includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
+    SET(VERSION ${PROJECT_VERSION})
+#    configure_file(json-c.pc.in json-c.pc @ONLY)
+#    set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
+    install(FILES ${PROJECT_BINARY_DIR}/SysMonitorMod DESTINATION "/home/olamed/")
+endif ()

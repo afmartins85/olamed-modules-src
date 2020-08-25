@@ -1,5 +1,9 @@
 #include "dapplication.h"
 #include "loguru.hpp"
+#include <chrono>
+#include <iostream>
+#include <thread>
+#include <vector>
 
 // Define the static DApplication pointer
 DApplication *DApplication::instance_ = nullptr;
@@ -54,56 +58,59 @@ DApplication *DApplication::getInstance(int argc, char *argv[]) {
  * @brief DApplication::exec
  */
 void DApplication::exec() {
+  std::vector<MachineInfo::CPUData> entries1;
+  std::vector<MachineInfo::CPUData> entries2;
+
   LOG_SCOPE_FUNCTION(INFO);
   LOG_F(INFO, "System Monitor Daemon Started!! Checking Systems...");
 
-  cout << " BEFORE: this->mptr_MachineInfo->Temperature:" << endl;  
-  this->m_ptr_MachineInfo->Temperature();
-  cout << " AFTER : this->mptr_MachineInfo->Temperature:" << endl;
-  cout << " TempCPU: ";
-  cout << this->m_ptr_MachineInfo->system() << endl;
-  //printf("TempCPU %.2f C", this->m_ptr_MachineInfo->system());
-  
-  this->m_ptr_MachineInfo->RAM_MemoryFreeVerify();
-  cout << " RAM avaliable: ";
-  cout << this->m_ptr_MachineInfo->ram_avaliable() << endl;
-  this->m_ptr_MachineInfo->RAM_MemoryTotalVerify();
-  cout << " RAM total: ";
-  cout << this->m_ptr_MachineInfo->ram_total() << endl;
-  
-  this->m_ptr_MachineInfo->setFilepath("/");
-  this->m_ptr_MachineInfo->FLASH_MemoryFreeVerify();
-  cout << " FLASH avaliable: ";
-  cout << this->m_ptr_MachineInfo->flash_avaliable() << endl;
-
-  this->m_ptr_MachineInfo->FLASH_MemoryTotalVerify();
-  cout << " FLASH total: ";
-  cout << this->m_ptr_MachineInfo->flash_total() << endl;
-
-  this->m_ptr_MachineInfo->DateTime();
-
-  this->m_ptr_MachineProtocol->setType(3);
-  this->m_ptr_MachineProtocol->setTotal_disk(this->m_ptr_MachineInfo->flash_avaliable());
-  this->m_ptr_MachineProtocol->setFree_disk(this->m_ptr_MachineInfo->flash_total());
-  this->m_ptr_MachineProtocol->setTotal_ram(this->m_ptr_MachineInfo->ram_avaliable());
-  this->m_ptr_MachineProtocol->setFree_ram(this->m_ptr_MachineInfo->ram_total());
-  this->m_ptr_MachineProtocol->setDate(this->m_ptr_MachineInfo->datetime());
-
-  this->m_ptr_MachineProtocol->prepare_json_object();
-  
-  this->m_ptr_Socket->setPort(8080);
-  this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
-  cout << "DApplication::exec():" << endl;
-
-  cout << "((this->m_ptr_MachineProtocol->json_message()).c_str()):" << endl;
-  cout << ((this->m_ptr_MachineProtocol->json_message()).c_str()) << endl;
-  this->m_ptr_Socket->setMessage(const_cast<char*>((this->m_ptr_MachineProtocol->json_message()).c_str()));
-  cout << "this->m_ptr_Socket->message():" << endl;
-  cout << this->m_ptr_Socket->message() << endl;
- 
-  this->m_ptr_Socket->Client();
-
   while (1) {
+    // Check system information at 5 seconds
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+
+    this->m_ptr_MachineInfo->CPUTemperature();
+    this->m_ptr_MachineInfo->CPUFanSpeed();
+    this->m_ptr_MachineInfo->RAM_MemoryFreeVerify();
+    this->m_ptr_MachineInfo->RAM_MemoryTotalVerify();
+    this->m_ptr_MachineInfo->FLASH_MemoryFreeVerify();
+    this->m_ptr_MachineInfo->FLASH_MemoryTotalVerify();
+
+    // snapshot 1
+    this->m_ptr_MachineInfo->ReadStatsCPU(entries1);
+
+    // 100ms pause
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    // snapshot 2
+    this->m_ptr_MachineInfo->ReadStatsCPU(entries2);
+
+    // print output
+    this->m_ptr_MachineInfo->PrintStats(entries1, entries2);
+
+    this->m_ptr_MachineInfo->DateTime();
+
+    this->m_ptr_MachineProtocol->setType(3);
+    this->m_ptr_MachineProtocol->setTotal_disk(this->m_ptr_MachineInfo->flash_avaliable());
+    this->m_ptr_MachineProtocol->setFree_disk(this->m_ptr_MachineInfo->flash_total());
+    this->m_ptr_MachineProtocol->setTotal_ram(this->m_ptr_MachineInfo->ram_avaliable());
+    this->m_ptr_MachineProtocol->setFree_ram(this->m_ptr_MachineInfo->ram_total());
+    this->m_ptr_MachineProtocol->setDate(this->m_ptr_MachineInfo->datetime());
+
+    this->m_ptr_MachineProtocol->prepare_json_object();
+
+    this->m_ptr_Socket->setPort(8080);
+    this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
+    cout << "DApplication::exec():" << endl;
+
+    cout << "((this->m_ptr_MachineProtocol->json_message()).c_str()):" << endl;
+    cout << ((this->m_ptr_MachineProtocol->json_message()).c_str()) << endl;
+    this->m_ptr_Socket->setMessage(const_cast<char *>((this->m_ptr_MachineProtocol->json_message()).c_str()));
+    cout << "this->m_ptr_Socket->message():" << endl;
+    cout << this->m_ptr_Socket->message() << endl;
+
+    this->m_ptr_Socket->Client();
+
+    this->m_ptr_MachineInfo->PrintInfoSystem();
   }
 }
 

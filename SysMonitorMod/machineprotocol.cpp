@@ -24,7 +24,8 @@ void MachineProtocol::create_json_object(struct json_object *jobj, const char *a
     }
 
     case Type::Int:
-      json_object_object_add(jobj, a, json_object_new_int(static_cast<int>(reinterpret_cast<intptr_t>(b))));
+      //json_object_object_add(jobj, a, json_object_new_int(static_cast<int>(reinterpret_cast<intptr_t>(b))));
+      json_object_object_add(jobj, a, json_object_new_int64(static_cast<int64_t>(reinterpret_cast<intptr_t>(b))));
       break;
  
     case Type::String:
@@ -60,11 +61,13 @@ void MachineProtocol::prepare_json_object(void) {
   create_json_object(jobj_actual, "free_disk", (void *)free_disk(), Type::Int); 
   create_json_object(jobj_actual, "total_ram", (void *)total_ram(), Type::Int); 
   create_json_object(jobj_actual, "free_ram", (void *)free_ram(), Type::Int); 
+  create_json_object(jobj_actual, "fan_speed", (void *)fan_speed(), Type::Int); 
+  create_json_object(jobj_actual, "cpu_temperature", (void *)&m_cpu_temperature, Type::Double); 
+  create_json_object(jobj_actual, "journal_err", (void *)journal_err(), Type::Int); 
   create_json_object(jobj_actual, "date", (void *)date().c_str(), Type::String); 
 
   //TO DO
   //create_json_object(jobj_actual, "cpu_usage", &m_cpu_usage, Type::Double);
-  //create_json_object(jobj_actual, "cpu_temperature", &m_cpu_temperature, Type::Double);
   //create_json_object(jobj_actual, "motherboard_temperature", &m_motherboard_temperature, Type::Double);
 
   if (json_object_equal(jobj_actual, jobj_previous) != 1) {

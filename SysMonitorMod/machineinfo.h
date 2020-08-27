@@ -10,6 +10,7 @@
 #include <sys/sysinfo.h>
 #include <time.h>
 #include <vector>
+#include <unistd.h>
 
 #define NUM_CPU_STATES 10
 
@@ -54,12 +55,16 @@ class MachineInfo {
   inline int fanSpeed() const { return m_fanSpeed; }
   inline void setFanSpeed(int fanSpeed) { m_fanSpeed = fanSpeed; }
 
+  inline int journalErrors() const { return m_journalErrors; }
+  inline void setJournalErrors(int journalErrors) { m_journalErrors = journalErrors; }
+
   void CPUTemperature(void);
   void CPUFanSpeed(void);
   void RAM_MemoryTotalVerify(void);
   void RAM_MemoryFreeVerify(void);
   void FLASH_MemoryTotalVerify(void);
   void FLASH_MemoryFreeVerify(void);
+  void JournalErrors(void);
 
   void PrintInfoSystem();
   void ReadStatsCPU(std::vector<CPUData> &entries);
@@ -79,6 +84,9 @@ class MachineInfo {
   unsigned long m_flash_total;
   string m_saveFilesPath;
   string m_datetime;
+  int m_journalErrors;
+
+  FILE * Process(const char* cmd);
 };
 
 #endif  // MACHINEINFO_H

@@ -109,6 +109,41 @@ void MachineInfo::FLASH_MemoryTotalVerify(void) {
   }
 }
 
+void MachineInfo::JournalErrors(void) {
+
+  FILE* p = Process("journalctl -p 3 -xb | grep -c ERROR");
+  char buffer[1024];
+  
+  fgets(buffer, 1024, p);
+  m_journalErrors = atoi(buffer);
+  printf(" => %d\n", m_journalErrors);
+  fclose(p);
+}
+
+FILE * MachineInfo::Process(const char* cmd) {
+
+  int fd[2];
+  int read_fd, write_fd;
+  int pid;
+
+  pipe(fd);
+  read_fd = fd[0];
+  write_fd = fd[1];
+  
+  pid = fork();
+
+  if(pid == 0) {
+    close(read_fd);
+    dup2(write_fd, 1);
+    close(write_fd);
+    execl("/bin/sh", "sh", "-c", cmd, NULL);
+    return NULL;
+  } else { 
+    close(write_fd);
+    return fdopen(read_fd, "r");
+  } 
+}
+
 /**
  * @brief MachineInfo::PrintInfoSystem
  */
@@ -120,6 +155,7 @@ void MachineInfo::PrintInfoSystem() {
   LOG_F(INFO, "FreeFlash %lu B", this->m_flash_avaliable);
   LOG_F(INFO, "TotalRAM %lu B", this->m_ram_total);
   LOG_F(INFO, "TotalFlash %lu B", this->m_flash_total);
+  LOG_F(INFO, "JournalErrors %d ERROR(S)", this->m_journalErrors);
 }
 
 /**

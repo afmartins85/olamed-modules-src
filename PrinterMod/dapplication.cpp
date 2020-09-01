@@ -89,6 +89,32 @@ void DApplication::exec() {
 
   this->m_ptr_Protocol->prepare_json_object();
 
+  //content: GVsbG8gV29ybGQgISEh -> Hello World !!!
+  this->m_ptr_Protocol->string_parse_json_object((char*)"{ \"type\": 4, \"id\": \"cf046407-ad01-4a61-925f-1d8156370c5c\", \"filename\": \"file_print\", \"filetype\": \".txt\", \"content\": \"SGVsbG8gV29ybGQgISEh\", \"date\": \"2020-08-01T20:10:10Z\"}");
+  this->m_ptr_Protocol->setType((uint64_t)this->m_ptr_Protocol->value_json_object("type"));
+  this->m_ptr_Protocol->setId((char*)this->m_ptr_Protocol->value_json_object("id"));
+  this->m_ptr_Protocol->setFilename((char*)this->m_ptr_Protocol->value_json_object("filename"));
+  this->m_ptr_Protocol->setFiletype((char*)this->m_ptr_Protocol->value_json_object("filetype"));
+  this->m_ptr_Protocol->setContent((char*)this->m_ptr_Protocol->value_json_object("content"));
+  this->m_ptr_Protocol->setDate((char*)this->m_ptr_Protocol->value_json_object("date"));
+ 
+  cout << "Testing the Get functions results:" << endl;
+  cout << "type: "; cout << this->m_ptr_Protocol->type() << endl;
+  cout << "id: "; cout << this->m_ptr_Protocol->id() << endl;
+  cout << "filename: "; cout << this->m_ptr_Protocol->filename() << endl;
+  cout << "filetype: "; cout << this->m_ptr_Protocol->filetype() << endl;
+  cout << "content: "; cout << this->m_ptr_Protocol->content() << endl;
+  cout << "date: "; cout << this->m_ptr_Protocol->date() << endl;
+  cout << "---" << endl;
+
+  cout << this->m_ptr_Protocol->base64_encode((const unsigned char*)"Hello World !!!", strlen("Hello World !!!")) << endl;
+  cout << this->m_ptr_Protocol->base64_decode(this->m_ptr_Protocol->content()) << endl;
+  cout << "---" << endl;
+  this->m_ptr_Protocol->file_save();
+  cout << "---" << endl;
+
+
+
   this->m_ptr_Socket->setPort(8080);
   this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
   cout << "DApplication::exec():" << endl;

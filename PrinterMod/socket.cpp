@@ -46,4 +46,40 @@ int Socket::Client(void) {
 }
 
 
-//Socket::Server()
+Socket::Server() {
+}
+
+
+void* Socket::Process(void* ptr) {
+  char* buffer;
+  int len = 1024;
+  connection_t* conn;
+  long addr = 0;
+
+  if(!ptr)
+    pthread_exit(0);
+
+  conn = (connection_t *)ptr;
+
+  if(len >0) {
+    addr = (long)((struct sockaddr_in *)&conn->address)->sin_addr.s_addr;
+    buffer = (char *)malloc((len+1)*sizeof(char)); 
+    
+    /* Read message */ 
+    read(conn->sock, buffer, len);
+    
+    /* Print message */
+    printf("%d.%d.%d.%d: %s\n", (int)((addr) & 0xff), (int)((addr >> 8) & 0xff), (int)((addr >> 16) & 0xff), (int)((addr >> 24) & 0xff), buffer);
+
+    /*Send message*/
+    //send(conn->sock, hello, strlen(hello), 0);
+
+   free(buffer); 
+  }
+
+  /* Close socket and clean up */
+  close(conn->sock);
+  free(conn);
+  pthread_exit(0);
+
+}

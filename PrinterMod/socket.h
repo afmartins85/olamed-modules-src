@@ -26,6 +26,7 @@ class Socket {
     inline void setMessage(string message){ m_message = message; }
 
     int Client(void);
+    void* Process(void* ptr);
 
   private:
     uint64_t m_port;
@@ -36,5 +37,12 @@ class Socket {
     char buffer[1024] = {0};
     int sock;
     int valread;
+
+    type struct {
+      int sock;
+      struct sockaddr address;
+      int addr_len;
+    }connection_t;
+
 };
 #endif  // SOCKET_H

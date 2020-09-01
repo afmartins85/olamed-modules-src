@@ -99,3 +99,181 @@ void PrinterProtocol::prepare_json_object(void) {
     cout << "---" << endl;
   }
 }
+
+void PrinterProtocol::string_parse_json_object(char *str) {
+  m_jobj = json_tokener_parse(str);
+}
+
+void* PrinterProtocol::value_json_object(const char *key) {
+/* PrintProtocol JSON:
+{
+  "type": 4,
+  "id": "cf046407-ad01-4a61-925f-1d8156370c5c",
+  "filename": "file_print",
+  "filetype": ".txt",
+  "content": "<base64>",
+  "date" : "2020-08-01T20:10:10Z"
+}
+*/
+  void* value;
+  double* shazam;
+  enum json_type type;
+  struct json_object *jobj;
+ 
+  jobj = json_object_object_get(m_jobj, key);
+  
+  type = json_object_get_type(jobj);
+
+  switch(type) {
+    case json_type_null:
+      printf("json_type_null\n");
+      break;
+
+    case json_type_boolean:
+      printf("json_type_boolen\n");
+      value = (void*)(json_object_get_boolean(jobj)?"true":"false");
+      printf("value: %s", (char*)value);
+      break;
+    
+    case json_type_double:
+      printf("json_type_double\n");
+      *shazam = json_object_get_double(jobj);//TODO: rework this "gambiarra"
+      value = (void*)shazam;
+      printf("value: %lf", json_object_get_double(jobj));
+      break;
+
+    case json_type_int:
+      printf("json_type_int\n");
+      value = (void*)(json_object_get_int(jobj));
+      printf("value: %ld", (uint64_t)value);
+      break;
+
+    case json_type_object:
+      printf("json_type_object\n");
+      //TODO:
+      //printf("value: %d", json_object_get_int(jobj))
+      break;
+    
+    case json_type_array:
+      printf("json_type_array\n");
+      //TODO:
+      //printf("value: %d", json_object_get_array(jobj))
+      //int arraylen = json_object_array_length(jobj);
+      //printf("Array Length: %d", arraylen);
+      //int i;
+      //json_object *jvalue;
+      //for(i=0; i<arraylen; i++) {
+      //  jvalue = json_object_array_get_idx(obj, i);
+      //  printf("value[%d]: %s\n", i, json_object_get_string(jvalue));
+      //}
+      break;
+    
+    case json_type_string:
+      printf("json_type_str\n");
+      value = (void*)json_object_get_string(jobj);
+      printf("value: %s", (char*)value);
+      break;
+  }
+  printf("\n---\n");
+  return value;
+}
+
+string PrinterProtocol::base64_decode(string const& encoded_string) {
+  int in_len = encoded_string.size();
+  int i = 0;
+  int j = 0;
+  int in_ = 0;
+  unsigned char char_array_4[4], char_array_3[3];
+  string ret;
+
+  while(in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_])) {
+    char_array_4[i++] = encoded_string[in_];
+    in_++;
+    if(i == 4) {
+      for(i=0; i < 4; i++)
+        char_array_4[i] = base64_chars.find(char_array_4[i]);
+
+      char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+      char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+      char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+
+      for(i=0; i < 3; i++)
+        ret += char_array_3[i];
+      i=0;
+    }
+  }
+
+  if(i) {
+    for(j=i; j < 4; j++)
+      char_array_4[j] = 0;
+    
+    for(j=0; j < 4; j++)
+      char_array_4[j] = base64_chars.find(char_array_4[j]);
+      
+    char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+    char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+    char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+  
+    for(j=0; (j < i-1); j++)
+      ret += char_array_3[j];
+  }
+
+  return ret;
+}
+
+string PrinterProtocol::base64_encode(unsigned char const* bytes_to_code, unsigned int in_len) {
+  string ret;
+  int i = 0;
+  int j = 0;
+
+  unsigned char char_array_3[3];
+  unsigned char char_array_4[4];
+
+  while(in_len--) {
+    char_array_3[i++] = *(bytes_to_code++);
+    if(i == 3) {
+      char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+      char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+      char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+      char_array_4[3] = char_array_3[2] & 0x3f;
+
+      for(i = 0; i < 4; i++)
+        ret += base64_chars[char_array_4[i]];
+      i = 0;
+    }
+  }
+
+  if(i) {
+    for(j = i; j < 3; j++) 
+      char_array_3[j] = '\0';
+
+    char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+    char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+    char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+    char_array_4[3] = char_array_3[2] & 0x3f;
+
+    for(j = 0; (j < i + 1); j++)
+      ret += base64_chars[char_array_4[j]];
+    
+    while((i++ < 3))
+      ret += '=';
+  }
+  return ret;
+}
+
+void PrinterProtocol::file_save(void) {
+
+  FILE *fp;
+
+  fp = fopen((m_filename + m_filetype).c_str(),"wb");
+  
+  cout << "File name is: "; cout << m_filename + m_filetype  << endl;
+
+  fprintf(fp, "%s", (base64_decode(content())).c_str());
+  //fwrite((base64_decode(content())).c_str(), sizeof(char), strlen((base64_decode(content())).c_str()), fp);
+
+  fclose(fp);
+  
+  cout << "File created !!!" << endl;
+
+}

@@ -5,6 +5,8 @@
 #include <ctype.h>
 #include <iostream>
 #include <json-c/json.h>
+#include <stdio.h>
+#include <string.h>
 
 using namespace std;
 
@@ -50,9 +52,30 @@ class PrinterProtocol : public SupplyPrinter {
 
   inline string json_message() const { return m_json_message; }
   inline void setJson_message (const string &json_message) { m_json_message = json_message; }
+
+  inline string id() const { return m_id; }
+  inline void setId (const string &id) { m_id = id; }
+
+  inline string filename() const { return m_filename; }
+  inline void setFilename (const string &filename) { m_filename = filename; }
+
+  inline string filetype() const { return m_filetype; }
+  inline void setFiletype (const string &filetype) { m_filetype = filetype; }
+
+  inline string content() const { return m_content; }
+  inline void setContent (const string &content) { m_content = content; }
+
+  inline string date() const { return m_date; }
+  inline void setDate (const string &date) { m_date = date; }
   
   void create_json_object(struct json_object *jobj, const char *a, void *b, int variable_b_type);
   void prepare_json_object(void);
+  void string_parse_json_object(char *str);
+  void* value_json_object(const char *key);
+
+  string base64_decode(string const& encoded_string);
+  string base64_encode(unsigned char const* bytes_to_code, unsigned int in_len);
+  void file_save(void);
 
  private:
   uint64_t m_type;
@@ -69,12 +92,24 @@ class PrinterProtocol : public SupplyPrinter {
   double m_yellow_level;
   double m_black_level;
 
+  // int m_type;
+  string m_id;
+  string m_filename;
+  string m_filetype;
+  string m_content;
+  string m_date;
+ 
+  const string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ""abcdefghijklmnopqrstuvwxyz""0123456789+/";
+
   string m_json_message;
 
+  struct json_object *m_jobj;
   struct json_object *jobj_actual;
   struct json_object *jobj_previous;
 
   enum Type : int { Null, Boolean, Double, Int, String, Object, Array };
+  
+  static inline bool is_base64(unsigned char c) { return (isalnum(c) || (c == '+') || (c == '/')); }
 };
 
 #endif  // PRINTERPROTOCOL_H

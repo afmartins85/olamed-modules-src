@@ -11,6 +11,7 @@ include(cmake/Utils.cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 find_package(NetSNMP)
+find_package(CUPS)
 find_package(PkgConfig)
 
 file(GLOB_RECURSE PrinterMod_HEADERS
@@ -67,8 +68,16 @@ else()
     message(ERROR "Failure on find net-SNMP!!!")
 endif()
 
+if (CUPS_FOUND)
+    message(STATUS "CUPS found")
+    include_directories(${CUPS_DIR})
+else()
+    message(ERROR "Failure on find CUPS!!!")
+endif()
+
 add_executable(PrinterMod ${PrinterMod_SOURCES} ${PrinterMod_HEADERS})
 target_link_libraries(PrinterMod ${APPS_LINK_LIBS})
 target_link_libraries(PrinterMod ${NETSNMP_LIBRARY})
+target_link_libraries(PrinterMod ${CUPS_LIBRARIES})
 target_link_libraries(PrinterMod "-lpthread")
 target_link_libraries(PrinterMod "-ldl")

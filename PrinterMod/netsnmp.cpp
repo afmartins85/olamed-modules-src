@@ -1,7 +1,7 @@
 #include "netsnmp.h"
-#ifdef DEMO_USE_SNMP_VERSION_3
-#include <transform_oids.h>
-#endif
+#include "loguru.hpp"
+#include <stdio.h>
+#include <string.h>
 
 /**
  * @brief NetSNMP::NetSNMP
@@ -11,66 +11,25 @@ NetSNMP::NetSNMP() {
    * Initialize the SNMP library
    */
   init_snmp("PrinterMod");
-#ifdef DEMO_USE_SNMP_VERSION_3
-  our_v3_passphrase = "The Net-SNMP Demo Password";
-#endif
 }
 
 /**
  * @brief NetSNMP::openSession
  * @return
  */
-bool NetSNMP::openSession() {
+bool NetSNMP::openSession(PrinterDevice &printer) {
   /*
    * Initialize a "session" that defines who we're going to talk to
    */
   snmp_sess_init(&session); /* set up defaults */
-  session.peername = const_cast<char *>("test.net-snmp.org");
-
-  /* set up the authentication parameters for talking to the server */
-
-#ifdef DEMO_USE_SNMP_VERSION_3
-
-  /* Use SNMPv3 to talk to the experimental server */
+  session.peername = const_cast<char *>(printer.address().c_str());
 
   /* set the SNMP version number */
-  session.version = SNMP_VERSION_3;
-
-  /* set the SNMPv3 user name */
-  session.securityName = strdup("MD5User");
-  session.securityNameLen = strlen(session.securityName);
-
-  /* set the security level to authenticated, but not encrypted */
-  session.securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
-
-  /* set the authentication method to MD5 */
-  session.securityAuthProto = usmHMACMD5AuthProtocol;
-  session.securityAuthProtoLen = sizeof(usmHMACMD5AuthProtocol) / sizeof(oid);
-  session.securityAuthKeyLen = USM_AUTH_KU_LEN;
-
-  /* set the authentication key to a MD5 hashed version of our
-      passphrase "The Net-SNMP Demo Password" (which must be at least 8
-      characters long) */
-  if (generate_Ku(session.securityAuthProto, session.securityAuthProtoLen, (u_char *)our_v3_passphrase,
-                  strlen(our_v3_passphrase), session.securityAuthKey, &session.securityAuthKeyLen) != SNMPERR_SUCCESS) {
-    //    snmp_perror(argv[0]);
-    snmp_log(LOG_ERR, "Error generating Ku from authentication pass phrase. \n");
-    exit(1);
-  }
-
-#else /* we'll use the insecure (but simpler) SNMPv1 */
-
-  /* set the SNMP version number */
-  session.version = SNMP_VERSION_1;
+  session.version = SNMP_VERSION_2c;
 
   /* set the SNMPv1 community name used for authentication */
-  session.community = "demopublic";
-  session.community_len = strlen(session.community);
-
-#endif /* SNMPv1 */
-
-  /* windows32 specific initialization (is a noop on unix) */
-  SOCK_STARTUP;
+  session.community = reinterpret_cast<u_char *>(const_cast<char *>("public"));
+  session.community_len = strlen(reinterpret_cast<char *>(session.community));
 
   /*
    * Open the session
@@ -88,53 +47,60 @@ bool NetSNMP::openSession() {
 /**
  * @brief NetSNMP::readIodTest
  */
-void NetSNMP::readIodTest() {
+void NetSNMP::readIodsPrinter(PrinterProtocol &prtProto) {
   /*
    * Create the PDU for the data for our request.
-   *   1) We're going to GET the system.sysDescr.0 node.
    */
   pdu = snmp_pdu_create(SNMP_MSG_GET);
-
-  read_objid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len);
-
+  // prtMarkerSuppliesDescription
+  read_objid("SNMPv2-SMI::mib-2.43.11.1.1.6.1.1", anOID, &anOID_len);
   snmp_add_null_var(pdu, anOID, anOID_len);
-
   /*
    * Send the Request out.
    */
   status = snmp_synch_response(ss, pdu, &response);
+  std::string suppliesDescription;
+  processResponse(&suppliesDescription);
+  prtProto.setSupply_type(suppliesDescription);
+  LOG_F(INFO, "supply_type: %s", suppliesDescription.c_str());
 
-  /*
-   * Process the response.
-   */
-  if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR) {
-    /*
-     * SUCCESS: Print the result variables
-     */
-    for (vars = response->variables; vars; vars = vars->next_variable)
-      print_variable(vars->name, vars->name_length, vars);
-    /* manipulate the information ourselves */
-    for (vars = response->variables; vars; vars = vars->next_variable) {
-      int count = 1;
-      if (vars->type == ASN_OCTET_STR) {
-        char *sp = (char *)malloc(1 + vars->val_len);
-        memcpy(sp, vars->val.string, vars->val_len);
-        sp[vars->val_len] = '\0';
-        printf("value #%d is a string: %s\n", count++, sp);
-        free(sp);
-      } else
-        printf("value #%d is NOT a string! Ack!\n", count++);
-    }
-  } else {
-    /*
-     * FAILURE: print what went wrong!
-     */
+  // prtGeneralPrinterName
+  pdu = snmp_pdu_create(SNMP_MSG_GET);
+  //  read_objid("SNMPv2-SMI::mib-2.43.5.1.1.16.1", anOID, &anOID_len);
+  read_objid("HOST-RESOURCES-MIB::hrDeviceDescr.1", anOID, &anOID_len);
+  snmp_add_null_var(pdu, anOID, anOID_len);
 
-    if (status == STAT_SUCCESS)
-      fprintf(stderr, "Error in packet\nReason: %s\n", snmp_errstring(response->errstat));
-    else
-      snmp_sess_perror("snmpget", ss);
-  }
+  status = snmp_synch_response(ss, pdu, &response);
+  std::string printerModel;
+  processResponse(&printerModel);
+
+  // prtGeneralSerialNumber
+  pdu = snmp_pdu_create(SNMP_MSG_GET);
+  read_objid("SNMPv2-SMI::mib-2.43.5.1.1.17.1", anOID, &anOID_len);
+  snmp_add_null_var(pdu, anOID, anOID_len);
+
+  status = snmp_synch_response(ss, pdu, &response);
+  std::string printerSerialNumber;
+  processResponse(&printerSerialNumber);
+
+  std::string description(printerModel);
+  description.append(", ");
+  description.append(suppliesDescription);
+  description.append(", ");
+  description.append(printerSerialNumber);
+  prtProto.setDescription(description);
+  LOG_F(INFO, "description: %s", description.c_str());
+
+  // HOST-RESOURCES-MIB::hrPrinterStatus
+  pdu = snmp_pdu_create(SNMP_MSG_GET);
+  read_objid("HOST-RESOURCES-MIB::hrPrinterStatus.1", anOID, &anOID_len);
+  snmp_add_null_var(pdu, anOID, anOID_len);
+
+  status = snmp_synch_response(ss, pdu, &response);
+  long printerStatus;
+  processResponse(&printerStatus);
+  prtProto.setState(this->decodePrinterStatus(printerStatus));
+  LOG_F(INFO, "status: %s(%ld)", this->decodePrinterStatus(printerStatus).c_str(), printerStatus);
 
   /*
    * Clean up:
@@ -143,7 +109,68 @@ void NetSNMP::readIodTest() {
    */
   if (response) snmp_free_pdu(response);
   snmp_close(ss);
+}
 
-  /* windows32 specific cleanup (is a noop on unix) */
-  SOCK_CLEANUP;
+/**
+ * @brief NetSNMP::processResponse
+ * @param ptr
+ * @return
+ */
+bool NetSNMP::processResponse(void *ptr) {
+  if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR) {
+    /* manipulate the information ourselves */
+    for (vars = response->variables; vars; vars = vars->next_variable) {
+      int count = 1;
+      if (vars->type == ASN_OCTET_STR) {
+        char *sp = (char *)malloc(1 + vars->val_len);
+        printf("vars_len %zu", vars->val_len);
+        memcpy(sp, vars->val.string, vars->val_len);
+        sp[vars->val_len] = '\0';
+        static_cast<std::string *>(ptr)->insert(0, sp);
+        free(sp);
+      } else if (vars->type == ASN_INTEGER) {
+        *static_cast<long *>(ptr) = *vars->val.integer;
+      } else {
+        LOG_F(WARNING, "value #%d Data type is not supported! Ack!\n", count++);
+        return false;
+      }
+    }
+  } else {
+    /*
+     * FAILURE: print what went wrong!
+     */
+    if (status == STAT_SUCCESS) {
+      LOG_F(ERROR, "Error in packet\nReason: %s\n", snmp_errstring(response->errstat));
+    } else {
+      snmp_sess_perror("snmpget", ss);
+    }
+    return false;
+  }
+  return true;
+}
+
+/**
+ * @brief NetSNMP::decodePrinterStatus
+ * @return
+ */
+string NetSNMP::decodePrinterStatus(long code) {
+  std::string status;
+  switch (code) {
+    case 1:
+      status.insert(0, "other");
+      break;
+    case 2:
+      status.insert(0, "unknown");
+      break;
+    case 3:
+      status.insert(0, "idle");
+      break;
+    case 4:
+      status.insert(0, "printing");
+      break;
+    case 5:
+      status.insert(0, "warmup");
+      break;
+  }
+  return status;
 }

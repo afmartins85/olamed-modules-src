@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#define MAX_TRY_CON 5
+
 class DApplication {
  public:
   static DApplication* getInstance();

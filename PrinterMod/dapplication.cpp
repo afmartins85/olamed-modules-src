@@ -56,6 +56,18 @@ DApplication *DApplication::getInstance(int argc, char *argv[]) {
   return instance_;
 }
 
+void* DApplication::func(void* ptr){
+  Socket* sock = reinterpret_cast<Socket*>(ptr);
+  sock->Server();
+  pthread_exit(NULL);
+} 
+   
+void DApplication::shazam(){
+  pthread_t ptid;
+  pthread_create(&ptid, NULL, &func, &m_ptr_Socket);
+  pthread_detach(ptid);
+} 
+
 /**
  * @brief DApplication::exec
  */
@@ -66,6 +78,8 @@ void DApplication::exec() {
   this->m_ptrDevice->findPrinter();
   // Set type protocol for response status
   this->m_ptr_Protocol->setType(2);
+
+  shazam();
 
   while (1) {
     // Check system information at 5 seconds
@@ -116,6 +130,8 @@ void DApplication::exec() {
     //  cout << this->m_ptr_Socket->message() << endl;
 
     //  this->m_ptr_Socket->Client();
+    
+    this->m_ptr_Socket->Server();
   }
 }
 

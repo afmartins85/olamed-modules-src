@@ -17,6 +17,9 @@ class DApplication {
 
   void exec();
 
+  static void* func(void* arg);
+  void shazam();
+
  protected:
  private:
   static DApplication* instance_;

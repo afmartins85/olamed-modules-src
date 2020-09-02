@@ -3,12 +3,17 @@
 
 #include <ctype.h>
 #include <iostream>
-
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+#include <pthread.h>
+//#include <linux/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <chrono>
+#include <thread>
+#include <vector>
 
 using namespace std;
 
@@ -26,7 +31,8 @@ class Socket {
     inline void setMessage(string message){ m_message = message; }
 
     int Client(void);
-    void* Process(void* ptr);
+    int Server(void);
+    static void* Process(void* ptr);
 
   private:
     uint64_t m_port;
@@ -38,10 +44,10 @@ class Socket {
     int sock;
     int valread;
 
-    type struct {
+    typedef struct {
       int sock;
       struct sockaddr address;
-      int addr_len;
+     socklen_t addr_len;
     }connection_t;
 
 };

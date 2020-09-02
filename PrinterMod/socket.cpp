@@ -46,16 +46,13 @@ int Socket::Client(void) {
   return 0;
 }
 
-<<<<<<< HEAD
-Socket::Server() {
-}
-
-
 void* Socket::Process(void* ptr) {
   char* buffer;
   int len = 1024;
   connection_t* conn;
   long addr = 0;
+
+  char* hello = "Hello from server C Multithread!!!"; 
 
   if(!ptr)
     pthread_exit(0);
@@ -72,8 +69,8 @@ void* Socket::Process(void* ptr) {
     /* Print message */
     printf("%d.%d.%d.%d: %s\n", (int)((addr) & 0xff), (int)((addr >> 8) & 0xff), (int)((addr >> 16) & 0xff), (int)((addr >> 24) & 0xff), buffer);
 
-    /*Send message*/
-    //send(conn->sock, hello, strlen(hello), 0);
+    /* Send message TODO*/
+    send(conn->sock, hello, strlen(hello), 0);
 
    free(buffer); 
   }
@@ -82,8 +79,55 @@ void* Socket::Process(void* ptr) {
   close(conn->sock);
   free(conn);
   pthread_exit(0);
-
 }
-=======
-// Socket::Server()
->>>>>>> 1ba5ab70edecc8e1ad99bb1e8e8a407f30d2544a
+
+int Socket::Server() {
+  int sock = -1;
+  struct sockaddr_in address;
+  int port = 9094;
+  connection_t * connection;
+  pthread_t thread;
+
+  /* Create socket */
+  sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  if(sock <= 0) {
+    printf("error: cannot create socket\n");
+    return -3;
+  }
+
+  /* Bind socket to port */
+  address.sin_family = AF_INET;
+  address.sin_addr.s_addr = INADDR_ANY;
+  address.sin_port = htons(port);
+
+  if(bind(sock, (struct sockaddr *)&address, sizeof(struct sockaddr_in)) > 0) {
+    printf("error: cannot bind socket to port %d\n", port);
+    return -4;
+  }
+  
+  /* Listen on port */
+  if(listen(sock, 5) < 0) {
+    printf("error: cannot listen on  port\n");
+    return -5;
+  }
+  
+  printf("ready and listening\n");
+
+  while(1) {
+
+   // Check system information at 0.01 seconds
+   std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    /* Accept incoming connections */
+    connection = (connection_t *)malloc(sizeof(connection_t));
+    connection->sock = accept(sock, &connection->address,&connection->addr_len);
+    if(connection->sock <= 0) {
+      free(connection);
+    } else {
+     /* Start a new thread but do not wait for it */
+      pthread_create(&thread, 0, Process, (void*)connection);
+      pthread_detach(thread);
+    }
+  }
+  return 0;
+}

@@ -6,6 +6,7 @@
 #include "printerprotocol.h"
 #include "socket.h"
 #include <iostream>
+#include <map>
 #include <string>
 
 using namespace std;
@@ -19,6 +20,13 @@ class DApplication {
 
   void exec();
 
+  static void parseMessageReceive(char*);
+  static void* printServerListen(void* arg);
+  void startServer();
+  void saveFile();
+  string fileExtension(string);
+  void printFileFromQueue();
+
  protected:
  private:
   static DApplication* instance_;
@@ -30,6 +38,9 @@ class DApplication {
   NetSNMP* m_netSNMP;
   Socket* m_ptr_Socket;
   PrinterDevice* m_ptrDevice;
+  int m_lifeCount;
+  string m_pathFile;
+  map<string, string> m_printQueue;
 };
 
 #endif

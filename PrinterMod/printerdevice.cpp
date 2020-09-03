@@ -266,7 +266,7 @@ void PrinterDevice::setIPPUrl() {
  * @return
  */
 bool PrinterDevice::isReadyCUPS() {
-  //  char buff[1024];
+  char buff[1024];
   std::string queueName(this->prtDiscovery()->devName());
   std::replace(queueName.begin(), queueName.end(), ' ', '_');
   std::string lp_cmd("lpstat -s");
@@ -282,115 +282,47 @@ bool PrinterDevice::isReadyCUPS() {
     LOG_F(INFO, "IsDefault %s", (user_data.dests->is_default ? "true" : "false"));
     LOG_F(INFO, "NumOptions %d", user_data.dests->num_options);
 
-    const char *model = cupsGetOption("printer-make-and-model", user_data.dests->num_options, user_data.dests->options);
-    LOG_F(INFO, "Model %s", model);
-
-    cups_dinfo_t *info = cupsCopyDestInfo(CUPS_HTTP_DEFAULT, user_data.dests);
-
-    //    if (cupsCheckDestSupported(CUPS_HTTP_DEFAULT, user_data.dests, info, CUPS_FINISHINGS, NULL)) {
-    //      ipp_attribute_t *finishings = cupsFindDestSupported(CUPS_HTTP_DEFAULT, user_data.dests, info,
-    //      CUPS_FINISHINGS); int count = ippGetCount(finishings);
-
-    //      puts("finishings supported:");
-    //      for (int i = 0; i < count; i++) printf("  %d\n", ippGetInteger(finishings, i));
-    //    } else
-    //      puts("finishings not supported.");
-
-    //    ipp_attribute_t *attrs = cupsFindDestSupported(CUPS_HTTP_DEFAULT, user_data.dests, info,
-    //    "job-creation-attributes"); int count = ippGetCount(attrs);
-
-    //    for (int i = 0; i < count; i++) puts(ippGetString(attrs, i, NULL));
-
-    //    ipp_attribute_t *ready_finishings = cupsFindDestReady(CUPS_HTTP_DEFAULT, user_data.dests, info,
-    //    CUPS_FINISHINGS);
-
-    //    if (ready_finishings != NULL) {
-    //      int i, count = ippGetCount(ready_finishings);
-
-    //      puts("finishings ready:");
-    //      for (i = 0; i < count; i++) printf("  %d\n", ippGetInteger(ready_finishings, i));
-    //    } else
-    //      puts("no finishings are ready.");
-
-    int job_id = 0;
-    int num_options = 0;
-    cups_option_t *options = NULL;
-
-    num_options = cupsAddOption(CUPS_COPIES, "1", num_options, &options);
-    num_options = cupsAddOption(CUPS_MEDIA, CUPS_MEDIA_A4, num_options, &options);
-    num_options = cupsAddOption(CUPS_SIDES, CUPS_SIDES_ONE_SIDED, num_options, &options);
-    //    num_options = cupsAddOption(CUPS_PRINT_COLOR_MODE, CUPS_PRINT_COLOR_MODE_AUTO, num_options, &options);
-
-    if (cupsCreateDestJob(CUPS_HTTP_DEFAULT, user_data.dests, info, &job_id, "Bradesco_28042020_153516.pdf",
-                          num_options, options) == IPP_STATUS_OK)
-      printf("Created job: %d\n", job_id);
-    else
-      printf("Unable to create job: %s\n", cupsLastErrorString());
-
-    FILE *fp = fopen("/home/anderson/Downloads/Bradesco_28042020_153516.pdf", "rb");
-    //    size_t bytes;
-    char buffer[65536];
-    std::string fPDF;
-    //    while ((bytes = fread(buffer, 1, sizeof(buffer), fp)) > 0)
-    //      ;
-
-    //    printf("size %zu\n", bytes);
-    //    bytes = strlen(buffer);
-    //    printf("%s", buffer);
-    while (fgets(buffer, 1024, fp)) {
-      fPDF.append(buffer);
+    if (user_data.dests->is_default) {
+      this->setIsReadyPrinter(true);
+      return true;
     }
-
-    printf("%s\n", fPDF.c_str());
-
-    if (cupsStartDestDocument(CUPS_HTTP_DEFAULT, user_data.dests, info, job_id, "Bradesco_28042020_153516.pdf",
-                              CUPS_FORMAT_PDF, 0, NULL, 1) == HTTP_STATUS_CONTINUE) {
-      //      while ((bytes = fread(buffer, 1, sizeof(buffer), fp)) > 0)
-      //        if (cupsWriteRequestData(CUPS_HTTP_DEFAULT, buffer, strlen(buffer)) != HTTP_STATUS_CONTINUE) break;
-      cupsWriteRequestData(CUPS_HTTP_DEFAULT, fPDF.c_str(), fPDF.size());
-
-      if (cupsFinishDestDocument(CUPS_HTTP_DEFAULT, user_data.dests, info) == IPP_STATUS_OK)
-        puts("Document send succeeded.");
-      else
-        printf("Document send failed: %s\n", cupsLastErrorString());
-    }
-
-    fclose(fp);
   }
 
-  //  FILE *file = this->lpstat(lp_cmd.c_str());
-  //  if (file == nullptr) {
-  //    return false;
-  //  }
+  FILE *file = this->lpstat(lp_cmd.c_str());
+  if (file == nullptr) {
+    return false;
+  }
 
-  //  while (fgets(buff, 1024, file)) {
-  //    if (strstr(buff, "No destinations added") == nullptr) {
-  //      LOG_F(INFO, "Printer system default destination %s", queueName.c_str());
-  //      this->setIsReadyPrinter(true);
-  //      return true;
-  //    } else {
-  //      LOG_F(WARNING, "Printer not is ready!!! Setting CUPS...");
-  //      lp_cmd.clear();
-  //      lp_cmd = "lpadmin -p ";
-  //      lp_cmd.append(queueName);
-  //      lp_cmd.append(" -E -v ");
-  //      lp_cmd.append(this->ipp());
-  //      lp_cmd.append(" -m everywhere");
-  //      LOG_F(INFO, "%s", lp_cmd.c_str());
-  //      if (!system(lp_cmd.c_str())) {
-  //        LOG_F(INFO, "Set the default printer: %s", queueName.c_str());
-  //        lp_cmd.clear();
-  //        lp_cmd = "lpoptions -d ";
-  //        lp_cmd.append(queueName);
-  //        if (!system(lp_cmd.c_str())) {
-  //          LOG_F(INFO, "Set Printer Succesfull!!");
-  //        } else {
-  //          LOG_F(ERROR, "Fail Set Default Printer!!");
-  //          return false;
-  //        }
-  //      }
-  //    }
-  //  }
+  while (fgets(buff, 1024, file)) {
+    if (strstr(buff, "No destinations added") != nullptr) {
+      LOG_F(INFO, "Printer system default destination %s", queueName.c_str());
+      this->setIsReadyPrinter(true);
+      return true;
+    } else {
+      LOG_F(WARNING, "Printer not is ready!!! Setting CUPS...");
+      lp_cmd.clear();
+      lp_cmd = "lpadmin -p ";
+      lp_cmd.append(queueName);
+      lp_cmd.append(" -E -v ");
+      lp_cmd.append(this->ipp());
+      lp_cmd.append(" -m everywhere");
+      LOG_F(INFO, "%s", lp_cmd.c_str());
+      if (!system(lp_cmd.c_str())) {
+        LOG_F(INFO, "Set the default printer: %s", queueName.c_str());
+        lp_cmd.clear();
+        lp_cmd = "lpoptions -d ";
+        lp_cmd.append(queueName);
+        LOG_F(INFO, "%s", lp_cmd.c_str());
+        if (!system(lp_cmd.c_str())) {
+          LOG_F(INFO, "Set Printer Succesfull!!");
+          break;
+        } else {
+          LOG_F(ERROR, "Fail Set Default Printer!!");
+          return false;
+        }
+      }
+    }
+  }
 
   this->setIsReadyPrinter(true);
   return true;
@@ -421,6 +353,91 @@ FILE *PrinterDevice::lpstat(const char *lp) {
     close(write_fd);
     return fdopen(read_fd, "r");
   }
+}
+
+/**
+ * @brief PrinterDevice::testCUPS
+ * @param user_data
+ */
+void PrinterDevice::testCUPS(my_user_data_t &user_data) {
+  const char *model = cupsGetOption("printer-make-and-model", user_data.dests->num_options, user_data.dests->options);
+  LOG_F(INFO, "Model %s", model);
+
+  cups_dinfo_t *info = cupsCopyDestInfo(CUPS_HTTP_DEFAULT, user_data.dests);
+
+  //  if (cupsCheckDestSupported(CUPS_HTTP_DEFAULT, user_data.dests, info, CUPS_FINISHINGS, NULL)) {
+  //    ipp_attribute_t *finishings = cupsFindDestSupported(CUPS_HTTP_DEFAULT, user_data.dests, info, CUPS_FINISHINGS);
+  //    int count = ippGetCount(finishings);
+
+  //    puts("finishings supported:");
+  //    for (int i = 0; i < count; i++) printf("  %d\n", ippGetInteger(finishings, i));
+  //  } else
+  //    puts("finishings not supported.");
+
+  //  ipp_attribute_t *attrs = cupsFindDestSupported(CUPS_HTTP_DEFAULT, user_data.dests, info,
+  //  "job-creation-attributes"); int count = ippGetCount(attrs);
+
+  //  for (int i = 0; i < count; i++) puts(ippGetString(attrs, i, NULL));
+
+  //  ipp_attribute_t *ready_finishings = cupsFindDestReady(CUPS_HTTP_DEFAULT, user_data.dests, info, CUPS_FINISHINGS);
+
+  //  if (ready_finishings != NULL) {
+  //    int i, count = ippGetCount(ready_finishings);
+
+  //    puts("finishings ready:");
+  //    for (i = 0; i < count; i++) printf("  %d\n", ippGetInteger(ready_finishings, i));
+  //  } else
+  //    puts("no finishings are ready.");
+
+  int job_id = 0;
+  int num_options = 0;
+  cups_option_t *options = NULL;
+
+  num_options = cupsAddOption(CUPS_COPIES, "1", num_options, &options);
+  num_options = cupsAddOption(CUPS_FINISHINGS, CUPS_FINISHINGS_NONE, num_options, &options);
+  num_options = cupsAddOption(CUPS_MEDIA, CUPS_MEDIA_A4, num_options, &options);
+  num_options = cupsAddOption(CUPS_MEDIA_SOURCE, CUPS_MEDIA_SOURCE_AUTO, num_options, &options);
+  num_options = cupsAddOption(CUPS_MEDIA_TYPE, CUPS_MEDIA_TYPE_PLAIN, num_options, &options);
+  num_options = cupsAddOption(CUPS_NUMBER_UP, "1", num_options, &options);
+  num_options = cupsAddOption(CUPS_ORIENTATION, CUPS_ORIENTATION_PORTRAIT, num_options, &options);
+  num_options = cupsAddOption(CUPS_PRINT_COLOR_MODE, CUPS_PRINT_COLOR_MODE_AUTO, num_options, &options);
+  num_options = cupsAddOption(CUPS_PRINT_QUALITY, CUPS_PRINT_QUALITY_NORMAL, num_options, &options);
+  num_options = cupsAddOption(CUPS_SIDES, CUPS_SIDES_TWO_SIDED_PORTRAIT, num_options, &options);
+
+  if (cupsCreateDestJob(CUPS_HTTP_DEFAULT, user_data.dests, info, &job_id, "Bradesco_28042020_153516.pdf", num_options,
+                        options) == IPP_STATUS_OK)
+    printf("Created job: %d\n", job_id);
+  else
+    printf("Unable to create job: %s\n", cupsLastErrorString());
+
+  FILE *fp = fopen("/home/anderson/Downloads/Bradesco_28042020_153516.pdf", "rb");
+  size_t bytes;
+  char buffer[65536];
+  //  std::string fPDF;
+  //    while ((bytes = fread(buffer, 1, sizeof(buffer), fp)) > 0)
+  //      ;
+
+  //    printf("size %zu\n", bytes);
+  //    bytes = strlen(buffer);
+  //    printf("%s", buffer);
+  //  while (fgets(buffer, 1024, fp)) {
+  //    fPDF.append(buffer);
+  //  }
+
+  if (cupsStartDestDocument(CUPS_HTTP_DEFAULT, user_data.dests, info, job_id, "Bradesco_28042020_153516.pdf",
+                            CUPS_FORMAT_PDF, num_options, NULL, 1) == HTTP_STATUS_CONTINUE) {
+    while ((bytes = fread(buffer, 1, sizeof(buffer), fp)) > 0)
+      if (cupsWriteRequestData(CUPS_HTTP_DEFAULT, buffer, strlen(buffer)) != HTTP_STATUS_CONTINUE) break;
+
+    //    cupsWriteRequestData(CUPS_HTTP_DEFAULT, fPDF.c_str(), fPDF.size());
+    //    std::this_thread::sleep_for(std::chrono::seconds(4));
+    if (cupsFinishDestDocument(CUPS_HTTP_DEFAULT, user_data.dests, info) == IPP_STATUS_OK)
+      puts("Document send succeeded.");
+    else
+      printf("Document send failed: %s\n", cupsLastErrorString());
+  }
+
+  fclose(fp);
 }
 
 /**

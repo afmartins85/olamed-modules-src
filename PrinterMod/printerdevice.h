@@ -9,6 +9,12 @@
 
 class PrinterDevice {
  public:
+  typedef struct {
+    int num_dests;
+    cups_dest_t* dests;
+  } my_user_data_t;
+
+ public:
   PrinterDevice();
 
   inline bool ptrIsFound() const { return m_ptrIsFound; }
@@ -64,12 +70,8 @@ class PrinterDevice {
   void setIPPUrl();
   //! Exec lpstat for check status of CUPS printers
   FILE* lpstat(const char* lp);
-
- public:
-  typedef struct {
-    int num_dests;
-    cups_dest_t* dests;
-  } my_user_data_t;
+  //! CUPS Tests
+  void testCUPS(my_user_data_t& user_data);
 
  protected:
   //! Callback for receive the printers destination

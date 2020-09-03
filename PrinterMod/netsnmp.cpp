@@ -35,6 +35,7 @@ bool NetSNMP::openSession(PrinterDevice &printer) {
    * Open the session
    */
   ss = snmp_open(&session); /* establish the session */
+
   if (!ss) {
     snmp_perror("ack");
     snmp_log(LOG_ERR, "something horrible happened!!!\n");
@@ -45,13 +46,30 @@ bool NetSNMP::openSession(PrinterDevice &printer) {
 }
 
 /**
- * @brief NetSNMP::readIodTest
+ * @brief NetSNMP::closeSession
  */
-void NetSNMP::readIodsPrinter(PrinterProtocol &prtProto) {
+void NetSNMP::closeSession() {
+  /*
+   * Clean up:
+   *  1) free the response.
+   *  2) close the session.
+   */
+  if (response) snmp_free_pdu(response);
+  snmp_close(ss);
+}
+
+/**
+ * @brief NetSNMP::readMIBDescription
+ * @param prtProto
+ */
+void NetSNMP::readMIBDescription(PrinterProtocol &prtProto) {
   /*
    * Create the PDU for the data for our request.
    */
   pdu = snmp_pdu_create(SNMP_MSG_GET);
+  oid anOID[MAX_OID_LEN];
+  size_t anOID_len = MAX_OID_LEN;
+
   // prtMarkerSuppliesDescription
   read_objid("SNMPv2-SMI::mib-2.43.11.1.1.6.1.1", anOID, &anOID_len);
   snmp_add_null_var(pdu, anOID, anOID_len);
@@ -82,6 +100,7 @@ void NetSNMP::readIodsPrinter(PrinterProtocol &prtProto) {
   status = snmp_synch_response(ss, pdu, &response);
   std::string printerSerialNumber;
   processResponse(&printerSerialNumber);
+  prtProto.setSerial(printerSerialNumber);
 
   std::string description(printerModel);
   description.append(", ");
@@ -90,9 +109,17 @@ void NetSNMP::readIodsPrinter(PrinterProtocol &prtProto) {
   description.append(printerSerialNumber);
   prtProto.setDescription(description);
   LOG_F(INFO, "description: %s", description.c_str());
+}
 
+/**
+ * @brief NetSNMP::readMIBStatus
+ * @param prtProto
+ */
+void NetSNMP::readMIBStatus(PrinterProtocol &prtProto) {
   // HOST-RESOURCES-MIB::hrPrinterStatus
   pdu = snmp_pdu_create(SNMP_MSG_GET);
+  oid anOID[MAX_OID_LEN];
+  size_t anOID_len = MAX_OID_LEN;
   read_objid("HOST-RESOURCES-MIB::hrPrinterStatus.1", anOID, &anOID_len);
   snmp_add_null_var(pdu, anOID, anOID_len);
 
@@ -101,14 +128,43 @@ void NetSNMP::readIodsPrinter(PrinterProtocol &prtProto) {
   processResponse(&printerStatus);
   prtProto.setState(this->decodePrinterStatus(printerStatus));
   LOG_F(INFO, "status: %s(%ld)", this->decodePrinterStatus(printerStatus).c_str(), printerStatus);
+}
 
-  /*
-   * Clean up:
-   *  1) free the response.
-   *  2) close the session.
-   */
-  if (response) snmp_free_pdu(response);
-  snmp_close(ss);
+/**
+ * @brief NetSNMP::readMIBErrors
+ * @param prtProto
+ */
+void NetSNMP::readMIBErrors(PrinterProtocol &prtProto) {
+  //  HOST-RESOURCES-MIB::hrPrinterDetectedErrorState
+  pdu = snmp_pdu_create(SNMP_MSG_GET);
+  oid anOID[MAX_OID_LEN];
+  size_t anOID_len = MAX_OID_LEN;
+  read_objid("HOST-RESOURCES-MIB::hrPrinterDetectedErrorState.1", anOID, &anOID_len);
+  snmp_add_null_var(pdu, anOID, anOID_len);
+
+  status = snmp_synch_response(ss, pdu, &response);
+  std::string printerError;
+  processResponse(&printerError);
+  prtProto.setError(printerError);
+  LOG_F(INFO, "error: %s", printerError.c_str());
+}
+
+/**
+ * @brief NetSNMP::readMIBLifeCount
+ * @param prtProto
+ */
+void NetSNMP::readMIBLifeCount(PrinterProtocol &prtProto) {
+  u_long lifeCount;
+  //  HOST-RESOURCES-MIB::hrPrinterDetectedErrorState
+  pdu = snmp_pdu_create(SNMP_MSG_GET);
+  oid anOID[MAX_OID_LEN];
+  size_t anOID_len = MAX_OID_LEN;
+  read_objid("SNMPv2-SMI::mib-2.43.10.2.1.4.1.1", anOID, &anOID_len);
+  snmp_add_null_var(pdu, anOID, anOID_len);
+  status = snmp_synch_response(ss, pdu, &response);
+  processResponse(&lifeCount);
+  prtProto.setPrints(lifeCount);
+  LOG_F(INFO, "Life Count: %ld", lifeCount);
 }
 
 /**
@@ -130,8 +186,10 @@ bool NetSNMP::processResponse(void *ptr) {
         free(sp);
       } else if (vars->type == ASN_INTEGER) {
         *static_cast<long *>(ptr) = *vars->val.integer;
+      } else if ((vars->type & ASN_APPLICATION) == ASN_APPLICATION) {
+        *static_cast<u_long *>(ptr) = vars->val.counter64->high;
       } else {
-        LOG_F(WARNING, "value #%d Data type is not supported! Ack!\n", count++);
+        LOG_F(WARNING, "value #%d Data type (%d) is not supported! Ack!\n", count++, vars->type);
         return false;
       }
     }

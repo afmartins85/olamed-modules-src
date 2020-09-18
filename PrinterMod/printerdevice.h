@@ -3,6 +3,7 @@
 
 #include "printerdiscovery.h"
 #include <cups/cups.h>
+#include <map>
 #include <set>
 #include <stdio.h>
 #include <unistd.h>
@@ -12,7 +13,7 @@ class PrinterDevice {
   typedef struct {
     int num_dests;
     cups_dest_t* dests;
-  } my_user_data_t;
+  } printer_data_t;
 
  public:
   PrinterDevice();
@@ -49,6 +50,13 @@ class PrinterDevice {
   bool findPrinter();
   //! Check for printer CUPs config
   bool isReadyCUPS();
+  bool isReadyCUPS(printer_data_t*);
+  //! Print file from queue
+  void printFileFromQueue(printer_data_t*);
+  //! Save the file and insert it into the print queue
+  void saveFile(const std::string& path, const std::string& fname, const std::string& id, const std::string& content);
+  //! Get mutex context
+  inline pthread_mutex_t getPrintServerMutex() const { return m_printServerMutex; }
 
  private:
   bool m_ptrIsFound;
@@ -61,6 +69,8 @@ class PrinterDevice {
   std::string m_ipp;
   std::string m_ippSuffix;
   PrinterDiscovery* m_prtDiscovery;
+  pthread_mutex_t m_printServerMutex;
+  std::map<std::string, std::string> m_printQueue;
   //! Exec an external shell command for list printer devices in local network
   FILE* avahi_browserExec();
   FILE* avahi_browserExec(const char* custom_avahi);
@@ -71,14 +81,14 @@ class PrinterDevice {
   //! Exec lpstat for check status of CUPS printers
   FILE* lpstat(const char* lp);
   //! CUPS Tests
-  void testCUPS(my_user_data_t& user_data);
+  void testCUPS(printer_data_t& user_data);
 
  protected:
   //! Callback for receive the printers destination
-  static int cbPrinterDest(my_user_data_t* user_data, unsigned flags, cups_dest_t* dest);
+  static int cbPrinterDest(printer_data_t* user_data, unsigned flags, cups_dest_t* dest);
   //! Return all printers destination available
   int getCUPSDests(cups_ptype_t type, cups_ptype_t mask, cups_dest_t** dests);
-  bool getCUPSDests(cups_ptype_t type, cups_ptype_t mask, my_user_data_t& user_data);
+  bool getCUPSDests(cups_ptype_t type, cups_ptype_t mask, printer_data_t& user_data);
 };
 
 #endif  // PRINTERDEVICE_H

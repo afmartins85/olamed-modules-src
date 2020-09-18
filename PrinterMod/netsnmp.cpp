@@ -6,7 +6,7 @@
 /**
  * @brief NetSNMP::NetSNMP
  */
-NetSNMP::NetSNMP() {
+NetSNMP::NetSNMP() : m_sOpen(false) {
   /*
    * Initialize the SNMP library
    */
@@ -21,25 +21,28 @@ bool NetSNMP::openSession(PrinterDevice &printer) {
   /*
    * Initialize a "session" that defines who we're going to talk to
    */
-  snmp_sess_init(&session); /* set up defaults */
-  session.peername = const_cast<char *>(printer.address().c_str());
+  if (m_sOpen == false) {
+    snmp_sess_init(&session); /* set up defaults */
+    session.peername = const_cast<char *>(printer.address().c_str());
 
-  /* set the SNMP version number */
-  session.version = SNMP_VERSION_2c;
+    /* set the SNMP version number */
+    session.version = SNMP_VERSION_2c;
 
-  /* set the SNMPv1 community name used for authentication */
-  session.community = reinterpret_cast<u_char *>(const_cast<char *>("public"));
-  session.community_len = strlen(reinterpret_cast<char *>(session.community));
+    /* set the SNMPv1 community name used for authentication */
+    session.community = reinterpret_cast<u_char *>(const_cast<char *>("public"));
+    session.community_len = strlen(reinterpret_cast<char *>(session.community));
 
-  /*
-   * Open the session
-   */
-  ss = snmp_open(&session); /* establish the session */
+    /*
+     * Open the session
+     */
+    ss = snmp_open(&session); /* establish the session */
 
-  if (!ss) {
-    snmp_perror("ack");
-    snmp_log(LOG_ERR, "something horrible happened!!!\n");
-    return false;
+    if (!ss) {
+      snmp_perror("ack");
+      snmp_log(LOG_ERR, "something horrible happened!!!\n");
+      return false;
+    }
+    m_sOpen = true;
   }
 
   return true;
@@ -49,20 +52,23 @@ bool NetSNMP::openSession(PrinterDevice &printer) {
  * @brief NetSNMP::closeSession
  */
 void NetSNMP::closeSession() {
-  /*
-   * Clean up:
-   *  1) free the response.
-   *  2) close the session.
-   */
-  if (response) snmp_free_pdu(response);
-  snmp_close(ss);
+  if (m_sOpen == true) {
+    /*
+     * Clean up:
+     *  1) free the response.
+     *  2) close the session.
+     */
+    if (response) snmp_free_pdu(response);
+    snmp_close(ss);
+    m_sOpen = false;
+  }
 }
 
 /**
  * @brief NetSNMP::readMIBDescription
  * @param prtProto
  */
-void NetSNMP::readMIBDescription(PrinterProtocol &prtProto) {
+bool NetSNMP::readMIBDescription(PrinterProtocol &prtProto) {
   /*
    * Create the PDU for the data for our request.
    */
@@ -76,11 +82,15 @@ void NetSNMP::readMIBDescription(PrinterProtocol &prtProto) {
   /*
    * Send the Request out.
    */
-  status = snmp_synch_response(ss, pdu, &response);
   std::string suppliesDescription;
-  processResponse(&suppliesDescription);
-  prtProto.setSupply_type(suppliesDescription);
-  LOG_F(INFO, "supply_type: %s", suppliesDescription.c_str());
+  status = snmp_synch_response(ss, pdu, &response);
+  if (status == STAT_TIMEOUT) {
+    return false;
+  } else {
+    processResponse(&suppliesDescription);
+    prtProto.setSupply_type(suppliesDescription);
+    LOG_F(INFO, "supply_type: %s", suppliesDescription.c_str());
+  }
 
   // prtGeneralPrinterName
   pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -88,9 +98,13 @@ void NetSNMP::readMIBDescription(PrinterProtocol &prtProto) {
   read_objid("HOST-RESOURCES-MIB::hrDeviceDescr.1", anOID, &anOID_len);
   snmp_add_null_var(pdu, anOID, anOID_len);
 
-  status = snmp_synch_response(ss, pdu, &response);
   std::string printerModel;
-  processResponse(&printerModel);
+  status = snmp_synch_response(ss, pdu, &response);
+  if (status == STAT_TIMEOUT) {
+    return false;
+  } else {
+    processResponse(&printerModel);
+  }
 
   // prtGeneralSerialNumber
   pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -99,8 +113,12 @@ void NetSNMP::readMIBDescription(PrinterProtocol &prtProto) {
 
   status = snmp_synch_response(ss, pdu, &response);
   std::string printerSerialNumber;
-  processResponse(&printerSerialNumber);
-  prtProto.setSerial(printerSerialNumber);
+  if (status == STAT_TIMEOUT) {
+    return false;
+  } else {
+    processResponse(&printerSerialNumber);
+    prtProto.setSerial(printerSerialNumber);
+  }
 
   std::string description(printerModel);
   description.append(", ");
@@ -109,13 +127,14 @@ void NetSNMP::readMIBDescription(PrinterProtocol &prtProto) {
   description.append(printerSerialNumber);
   prtProto.setDescription(description);
   LOG_F(INFO, "description: %s", description.c_str());
+  return true;
 }
 
 /**
  * @brief NetSNMP::readMIBStatus
  * @param prtProto
  */
-void NetSNMP::readMIBStatus(PrinterProtocol &prtProto) {
+bool NetSNMP::readMIBStatus(PrinterProtocol &prtProto) {
   // HOST-RESOURCES-MIB::hrPrinterStatus
   pdu = snmp_pdu_create(SNMP_MSG_GET);
   oid anOID[MAX_OID_LEN];
@@ -123,18 +142,23 @@ void NetSNMP::readMIBStatus(PrinterProtocol &prtProto) {
   read_objid("HOST-RESOURCES-MIB::hrPrinterStatus.1", anOID, &anOID_len);
   snmp_add_null_var(pdu, anOID, anOID_len);
 
-  status = snmp_synch_response(ss, pdu, &response);
   long printerStatus;
-  processResponse(&printerStatus);
-  prtProto.setState(this->decodePrinterStatus(printerStatus));
-  LOG_F(INFO, "status: %s(%ld)", this->decodePrinterStatus(printerStatus).c_str(), printerStatus);
+  status = snmp_synch_response(ss, pdu, &response);
+  if (status == STAT_TIMEOUT) {
+    return false;
+  } else {
+    processResponse(&printerStatus);
+    prtProto.setState(this->decodePrinterStatus(printerStatus));
+    LOG_F(INFO, "status: %s(%ld)", this->decodePrinterStatus(printerStatus).c_str(), printerStatus);
+  }
+  return true;
 }
 
 /**
  * @brief NetSNMP::readMIBErrors
  * @param prtProto
  */
-void NetSNMP::readMIBErrors(PrinterProtocol &prtProto) {
+bool NetSNMP::readMIBErrors(PrinterProtocol &prtProto) {
   //  HOST-RESOURCES-MIB::hrPrinterDetectedErrorState
   pdu = snmp_pdu_create(SNMP_MSG_GET);
   oid anOID[MAX_OID_LEN];
@@ -142,18 +166,23 @@ void NetSNMP::readMIBErrors(PrinterProtocol &prtProto) {
   read_objid("HOST-RESOURCES-MIB::hrPrinterDetectedErrorState.1", anOID, &anOID_len);
   snmp_add_null_var(pdu, anOID, anOID_len);
 
-  status = snmp_synch_response(ss, pdu, &response);
   std::string printerError;
-  processResponse(&printerError);
-  prtProto.setError(printerError);
-  LOG_F(INFO, "error: %s", printerError.c_str());
+  status = snmp_synch_response(ss, pdu, &response);
+  if (status == STAT_TIMEOUT) {
+    return false;
+  } else {
+    processResponse(&printerError);
+    prtProto.setError(printerError);
+    LOG_F(INFO, "error: %s", printerError.c_str());
+  }
+  return true;
 }
 
 /**
  * @brief NetSNMP::readMIBLifeCount
  * @param prtProto
  */
-void NetSNMP::readMIBLifeCount(PrinterProtocol &prtProto) {
+bool NetSNMP::readMIBLifeCount(PrinterProtocol &prtProto) {
   u_long lifeCount;
   //  HOST-RESOURCES-MIB::hrPrinterDetectedErrorState
   pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -162,9 +191,14 @@ void NetSNMP::readMIBLifeCount(PrinterProtocol &prtProto) {
   read_objid("SNMPv2-SMI::mib-2.43.10.2.1.4.1.1", anOID, &anOID_len);
   snmp_add_null_var(pdu, anOID, anOID_len);
   status = snmp_synch_response(ss, pdu, &response);
-  processResponse(&lifeCount);
-  prtProto.setPrints(lifeCount);
-  LOG_F(INFO, "Life Count: %ld", lifeCount);
+  if (status == STAT_TIMEOUT) {
+    return false;
+  } else {
+    processResponse(&lifeCount);
+    prtProto.setPrints(lifeCount);
+    LOG_F(INFO, "Life Count: %ld", lifeCount);
+  }
+  return true;
 }
 
 /**

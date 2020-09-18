@@ -1,5 +1,6 @@
 #include "printerdevice.h"
 #include "loguru.hpp"
+#include "printerprotocol.h"
 #include <chrono>
 #include <cups/cups.h>
 #include <iostream>
@@ -12,7 +13,7 @@
 /**
  * @brief PrinterDevice::PrinterDevice
  */
-PrinterDevice::PrinterDevice() : m_ptrIsFound(false) {
+PrinterDevice::PrinterDevice() : m_ptrIsFound(false), m_printServerMutex(PTHREAD_MUTEX_INITIALIZER) {
   this->m_ipp.insert(0, "ipp://");
   this->m_ippSuffix.insert(0, "/ipp/print");
 }
@@ -255,10 +256,15 @@ bool PrinterDevice::resolveDataHost(PrinterDiscovery *p_ptr) {
  * @brief PrinterDevice::setIPPUrl
  */
 void PrinterDevice::setIPPUrl() {
-  this->m_ipp.append(this->hostName());
-  this->m_ipp.append(":");
-  this->m_ipp.append(this->port());
-  this->m_ipp.append(this->m_ippSuffix);
+  static bool isIPPReady = false;
+
+  if (!isIPPReady) {
+    this->m_ipp.append(this->hostName());
+    this->m_ipp.append(":");
+    this->m_ipp.append(this->port());
+    this->m_ipp.append(this->m_ippSuffix);
+    isIPPReady = true;
+  }
 }
 
 /**
@@ -270,23 +276,6 @@ bool PrinterDevice::isReadyCUPS() {
   std::string queueName(this->prtDiscovery()->devName());
   std::replace(queueName.begin(), queueName.end(), ' ', '_');
   std::string lp_cmd("lpstat -s");
-
-  my_user_data_t user_data = {0, NULL};
-  getCUPSDests(0, 0, user_data);
-
-  for (int i = 0; i < user_data.num_dests; ++i) {
-    LOG_F(INFO, "Destination available: %s", user_data.dests->name);
-    LOG_F(INFO, "Options: %s", user_data.dests->options->name);
-    LOG_F(INFO, "Options value: %s", user_data.dests->options->value);
-    LOG_F(INFO, "Instance: %s", user_data.dests->instance);
-    LOG_F(INFO, "IsDefault %s", (user_data.dests->is_default ? "true" : "false"));
-    LOG_F(INFO, "NumOptions %d", user_data.dests->num_options);
-
-    if (user_data.dests->is_default) {
-      this->setIsReadyPrinter(true);
-      return true;
-    }
-  }
 
   FILE *file = this->lpstat(lp_cmd.c_str());
   if (file == nullptr) {
@@ -324,8 +313,86 @@ bool PrinterDevice::isReadyCUPS() {
     }
   }
 
-  this->setIsReadyPrinter(true);
-  return true;
+  return false;
+}
+
+/**
+ * @brief PrinterDevice::isReadyCUPS
+ * @param user_data
+ * @return
+ */
+bool PrinterDevice::isReadyCUPS(PrinterDevice::printer_data_t *user_data) {
+  std::string queueName(this->prtDiscovery()->devName());
+  std::replace(queueName.begin(), queueName.end(), ' ', '_');
+
+  getCUPSDests(0, 0, *user_data);
+
+  for (int i = 0; i < user_data->num_dests; ++i) {
+    LOG_F(INFO, "Destination available: %s", user_data->dests->name);
+    LOG_F(INFO, "Options: %s", user_data->dests->options->name);
+    LOG_F(INFO, "Options value: %s", user_data->dests->options->value);
+    LOG_F(INFO, "Instance: %s", user_data->dests->instance);
+    LOG_F(INFO, "IsDefault %s", (user_data->dests->is_default ? "true" : "false"));
+    LOG_F(INFO, "NumOptions %d", user_data->dests->num_options);
+
+    if (!queueName.compare(user_data->dests->name)) {
+      LOG_F(INFO, "Printer is found!");
+      cupsSetDests(i, user_data->dests);
+      cupsSetDefaultDest(user_data->dests->name, user_data->dests->instance, i, user_data->dests);
+      this->setIsReadyPrinter(true);
+
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * @brief PrinterDevice::printFileFromQueue
+ */
+void PrinterDevice::printFileFromQueue(PrinterDevice::printer_data_t *printer_data) {
+  pthread_mutex_lock(&m_printServerMutex);
+
+  if (this->m_printQueue.size() > 0) {
+    LOG_SCOPE_FUNCTION(INFO);
+    LOG_F(INFO, "There are pending print files!!");
+    auto it = this->m_printQueue.begin();
+
+    cups_dest_t *dests = printer_data->dests;
+    int res = cupsPrintFile(dests->name, it->second.c_str(), "OlaMed Print File", dests->num_options, dests->options);
+    if (res) {
+      LOG_F(INFO, "Document send succeeded.");
+      remove(it->second.c_str());
+      this->m_printQueue.erase(it);
+    } else {
+      LOG_F(ERROR, "Document (%s) send failed.", it->second.c_str());
+      LOG_F(ERROR, "Printer Message: %s", cupsLastErrorString());
+    }
+  }
+  pthread_mutex_unlock(&m_printServerMutex);
+}
+
+/**
+ * @brief PrinterDevice::saveFile
+ */
+void PrinterDevice::saveFile(const std::string &path, const std::string &fname, const std::string &id,
+                             const std::string &content) {
+  FILE *fp;
+  std::string file;
+
+  file.insert(0, path);
+  file.append(id);
+  file.append("_");
+  file.append(fname);
+  //  file.append(this->fileExtension(this->m_ptr_Protocol->filetype()));
+  std::replace(file.begin(), file.end(), ' ', '-');
+  // Insert file in print queue
+  this->m_printQueue.insert({id, file});
+
+  fp = fopen(file.c_str(), "wb");
+
+  fprintf(fp, "%s", (PrinterProtocol::base64_decode(content)).c_str());
+  fclose(fp);
 }
 
 /**
@@ -359,11 +426,11 @@ FILE *PrinterDevice::lpstat(const char *lp) {
  * @brief PrinterDevice::testCUPS
  * @param user_data
  */
-void PrinterDevice::testCUPS(my_user_data_t &user_data) {
-  const char *model = cupsGetOption("printer-make-and-model", user_data.dests->num_options, user_data.dests->options);
-  LOG_F(INFO, "Model %s", model);
+void PrinterDevice::testCUPS(printer_data_t &user_data) {
+  //  const char *model = cupsGetOption("printer-make-and-model", user_data.dests->num_options,
+  //  user_data.dests->options); LOG_F(INFO, "Model %s", model);
 
-  cups_dinfo_t *info = cupsCopyDestInfo(CUPS_HTTP_DEFAULT, user_data.dests);
+  //  cups_dinfo_t *info = cupsCopyDestInfo(CUPS_HTTP_DEFAULT, user_data.dests);
 
   //  if (cupsCheckDestSupported(CUPS_HTTP_DEFAULT, user_data.dests, info, CUPS_FINISHINGS, NULL)) {
   //    ipp_attribute_t *finishings = cupsFindDestSupported(CUPS_HTTP_DEFAULT, user_data.dests, info, CUPS_FINISHINGS);
@@ -389,30 +456,31 @@ void PrinterDevice::testCUPS(my_user_data_t &user_data) {
   //  } else
   //    puts("no finishings are ready.");
 
-  int job_id = 0;
-  int num_options = 0;
-  cups_option_t *options = NULL;
+  //  int job_id = 0;
+  //  int num_options = 0;
+  //  cups_option_t *options = NULL;
 
-  num_options = cupsAddOption(CUPS_COPIES, "1", num_options, &options);
-  num_options = cupsAddOption(CUPS_FINISHINGS, CUPS_FINISHINGS_NONE, num_options, &options);
-  num_options = cupsAddOption(CUPS_MEDIA, CUPS_MEDIA_A4, num_options, &options);
-  num_options = cupsAddOption(CUPS_MEDIA_SOURCE, CUPS_MEDIA_SOURCE_AUTO, num_options, &options);
-  num_options = cupsAddOption(CUPS_MEDIA_TYPE, CUPS_MEDIA_TYPE_PLAIN, num_options, &options);
-  num_options = cupsAddOption(CUPS_NUMBER_UP, "1", num_options, &options);
-  num_options = cupsAddOption(CUPS_ORIENTATION, CUPS_ORIENTATION_PORTRAIT, num_options, &options);
-  num_options = cupsAddOption(CUPS_PRINT_COLOR_MODE, CUPS_PRINT_COLOR_MODE_AUTO, num_options, &options);
-  num_options = cupsAddOption(CUPS_PRINT_QUALITY, CUPS_PRINT_QUALITY_NORMAL, num_options, &options);
-  num_options = cupsAddOption(CUPS_SIDES, CUPS_SIDES_TWO_SIDED_PORTRAIT, num_options, &options);
+  //  num_options = cupsAddOption(CUPS_COPIES, "1", num_options, &options);
+  //  num_options = cupsAddOption(CUPS_FINISHINGS, CUPS_FINISHINGS_NONE, num_options, &options);
+  //  num_options = cupsAddOption(CUPS_MEDIA, CUPS_MEDIA_A4, num_options, &options);
+  //  num_options = cupsAddOption(CUPS_MEDIA_SOURCE, CUPS_MEDIA_SOURCE_AUTO, num_options, &options);
+  //  num_options = cupsAddOption(CUPS_MEDIA_TYPE, CUPS_MEDIA_TYPE_PLAIN, num_options, &options);
+  //  num_options = cupsAddOption(CUPS_NUMBER_UP, "1", num_options, &options);
+  //  num_options = cupsAddOption(CUPS_ORIENTATION, CUPS_ORIENTATION_PORTRAIT, num_options, &options);
+  //  num_options = cupsAddOption(CUPS_PRINT_COLOR_MODE, CUPS_PRINT_COLOR_MODE_AUTO, num_options, &options);
+  //  num_options = cupsAddOption(CUPS_PRINT_QUALITY, CUPS_PRINT_QUALITY_NORMAL, num_options, &options);
+  //  num_options = cupsAddOption(CUPS_SIDES, CUPS_SIDES_TWO_SIDED_PORTRAIT, num_options, &options);
 
-  if (cupsCreateDestJob(CUPS_HTTP_DEFAULT, user_data.dests, info, &job_id, "Bradesco_28042020_153516.pdf", num_options,
-                        options) == IPP_STATUS_OK)
-    printf("Created job: %d\n", job_id);
-  else
-    printf("Unable to create job: %s\n", cupsLastErrorString());
+  //  if (cupsCreateDestJob(CUPS_HTTP_DEFAULT, user_data.dests, info, &job_id, "Bradesco_28042020_153516.pdf",
+  //  num_options,
+  //                        options) == IPP_STATUS_OK)
+  //    printf("Created job: %d\n", job_id);
+  //  else
+  //    printf("Unable to create job: %s\n", cupsLastErrorString());
 
-  FILE *fp = fopen("/home/anderson/Downloads/Bradesco_28042020_153516.pdf", "rb");
-  size_t bytes;
-  char buffer[65536];
+  //  FILE *fp = fopen("/home/anderson/Downloads/Bradesco_28042020_153516.pdf", "rb");
+  //  size_t bytes;
+  //  char buffer[65536];
   //  std::string fPDF;
   //    while ((bytes = fread(buffer, 1, sizeof(buffer), fp)) > 0)
   //      ;
@@ -424,20 +492,24 @@ void PrinterDevice::testCUPS(my_user_data_t &user_data) {
   //    fPDF.append(buffer);
   //  }
 
-  if (cupsStartDestDocument(CUPS_HTTP_DEFAULT, user_data.dests, info, job_id, "Bradesco_28042020_153516.pdf",
-                            CUPS_FORMAT_PDF, num_options, NULL, 1) == HTTP_STATUS_CONTINUE) {
-    while ((bytes = fread(buffer, 1, sizeof(buffer), fp)) > 0)
-      if (cupsWriteRequestData(CUPS_HTTP_DEFAULT, buffer, strlen(buffer)) != HTTP_STATUS_CONTINUE) break;
+  int res = cupsPrintFile(user_data.dests->name, "/home/anderson/Downloads/Bradesco_28042020_153516.pdf",
+                          "Bradesco_28042020_153516", user_data.dests->num_options, user_data.dests->options);
 
-    //    cupsWriteRequestData(CUPS_HTTP_DEFAULT, fPDF.c_str(), fPDF.size());
-    //    std::this_thread::sleep_for(std::chrono::seconds(4));
-    if (cupsFinishDestDocument(CUPS_HTTP_DEFAULT, user_data.dests, info) == IPP_STATUS_OK)
-      puts("Document send succeeded.");
-    else
-      printf("Document send failed: %s\n", cupsLastErrorString());
-  }
+  LOG_F(INFO, "Printer Default %s Res %d", user_data.dests->name, res);
+  //  if (cupsStartDestDocument(CUPS_HTTP_DEFAULT, user_data.dests, info, job_id, "Bradesco_28042020_153516.pdf",
+  //                            CUPS_FORMAT_PDF, num_options, NULL, 1) == HTTP_STATUS_CONTINUE) {
+  //    while ((bytes = fread(buffer, 1, sizeof(buffer), fp)) > 0)
+  //      if (cupsWriteRequestData(CUPS_HTTP_DEFAULT, buffer, strlen(buffer)) != HTTP_STATUS_CONTINUE) break;
 
-  fclose(fp);
+  //    //    cupsWriteRequestData(CUPS_HTTP_DEFAULT, fPDF.c_str(), fPDF.size());
+  //    //    std::this_thread::sleep_for(std::chrono::seconds(4));
+  //    if (cupsFinishDestDocument(CUPS_HTTP_DEFAULT, user_data.dests, info) == IPP_STATUS_OK)
+  //      puts("Document send succeeded.");
+  //    else
+  //      printf("Document send failed: %s\n", cupsLastErrorString());
+  //  }
+
+  //  fclose(fp);
 }
 
 /**
@@ -447,7 +519,7 @@ void PrinterDevice::testCUPS(my_user_data_t &user_data) {
  * @param dest
  * @return
  */
-int PrinterDevice::cbPrinterDest(PrinterDevice::my_user_data_t *user_data, unsigned flags, cups_dest_t *dest) {
+int PrinterDevice::cbPrinterDest(PrinterDevice::printer_data_t *user_data, unsigned flags, cups_dest_t *dest) {
   if (flags & CUPS_DEST_FLAGS_REMOVED) {
     /*
      * Remove destination from array...
@@ -471,7 +543,7 @@ int PrinterDevice::cbPrinterDest(PrinterDevice::my_user_data_t *user_data, unsig
  * @return
  */
 int PrinterDevice::getCUPSDests(cups_ptype_t type, cups_ptype_t mask, cups_dest_t **dests) {
-  my_user_data_t user_data = {0, NULL};
+  printer_data_t user_data = {0, NULL};
 
   if (!cupsEnumDests(CUPS_DEST_FLAGS_NONE, 1000, NULL, type, mask, (cups_dest_cb_t)cbPrinterDest, &user_data)) {
     /*
@@ -499,7 +571,7 @@ int PrinterDevice::getCUPSDests(cups_ptype_t type, cups_ptype_t mask, cups_dest_
  * @param user_data
  * @return
  */
-bool PrinterDevice::getCUPSDests(cups_ptype_t type, cups_ptype_t mask, my_user_data_t &user_data) {
+bool PrinterDevice::getCUPSDests(cups_ptype_t type, cups_ptype_t mask, printer_data_t &user_data) {
   if (!cupsEnumDests(CUPS_DEST_FLAGS_NONE, 1000, NULL, type, mask, (cups_dest_cb_t)cbPrinterDest, &user_data)) {
     /*
      * An error occurred, free all of the destinations and

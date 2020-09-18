@@ -12,14 +12,15 @@ class NetSNMP {
 
   bool openSession(PrinterDevice &);
   void closeSession();
-  void readMIBDescription(PrinterProtocol &);
-  void readMIBStatus(PrinterProtocol &);
-  void readMIBErrors(PrinterProtocol &);
-  void readMIBLifeCount(PrinterProtocol &);
+  bool readMIBDescription(PrinterProtocol &);
+  bool readMIBStatus(PrinterProtocol &);
+  bool readMIBErrors(PrinterProtocol &);
+  bool readMIBLifeCount(PrinterProtocol &);
   bool processResponse(void *);
   std::string decodePrinterStatus(long);
 
  private:
+  bool m_sOpen;
   struct snmp_session session, *ss;
   struct snmp_pdu *pdu;
   struct snmp_pdu *response;

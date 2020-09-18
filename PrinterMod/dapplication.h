@@ -11,7 +11,7 @@
 
 using namespace std;
 
-#define MAX_TRY_CON 5
+#define MAX_TRY_CON 3
 
 class DApplication {
  public:
@@ -23,9 +23,7 @@ class DApplication {
   static void parseMessageReceive(char*);
   static void* printServerListen(void* arg);
   void startServer();
-  void saveFile();
   string fileExtension(string);
-  void printFileFromQueue();
 
  protected:
  private:
@@ -40,7 +38,6 @@ class DApplication {
   PrinterDevice* m_ptrDevice;
   int m_lifeCount;
   string m_pathFile;
-  map<string, string> m_printQueue;
 };
 
 #endif

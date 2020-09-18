@@ -1,37 +1,133 @@
 #include "socket.h"
 #include "dapplication.h"
 #include "loguru.hpp"
+#include <sys/ioctl.h>
 
 /**
  * @brief Socket::Socket
  */
-Socket::Socket() {}
+Socket::Socket() : m_ConStatus(Disconnected) {}
 
-int Socket::Client(void) {
-  if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    LOG_F(ERROR, "\nSocket creation error \n");
-    return -1;
+/**
+ * @brief Socket::clientConnect
+ * @return
+ */
+bool Socket::clientConnect() {
+  struct timeval tv;
+
+  tv.tv_sec = 0;
+  tv.tv_usec = 10;
+
+  if ((m_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_IP)) < 0) {
+    LOG_F(ERROR, "Client socket creation error");
+    return false;
   }
 
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons(m_port);
 
   if (inet_pton(AF_INET, address(), &serv_addr.sin_addr) <= 0) {
-    LOG_F(ERROR, "\nInvalid address/ Address not  supported \n");
+    LOG_F(ERROR, "Invalid address/ Address not  supported");
+    return false;
+  }
+
+  if (setsockopt(m_sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+    LOG_F(ERROR, "Set timeout with sync server error");
+    return false;
+  }
+
+  if (connect(m_sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    LOG_F(ERROR, "Connection Failed. SyncMod can be down!!");
+    return false;
+  }
+  return true;
+}
+
+/**
+ * @brief Socket::clientClose
+ */
+void Socket::clientClose() { close(this->m_sock); }
+
+/**
+ * @brief Socket::receivedData
+ * @return
+ */
+Socket::CConnectionState Socket::clientSelect() {
+  fd_set rfds;
+  struct timeval tv;
+  int retval;
+
+  /* Watch stdin (fd 0) to see when it has input. */
+
+  FD_ZERO(&rfds);
+  FD_SET(this->m_sock, &rfds);
+
+  /* Wait up to five seconds. */
+
+  tv.tv_sec = 5;
+  tv.tv_usec = 0;
+
+  retval = select(this->m_sock + 1, &rfds, NULL, NULL, &tv);
+  /* Don't rely on the value of tv now! */
+
+  LOG_F(INFO, "retval %d", retval);
+  if (retval == -1) {
+    LOG_F(ERROR, "select()");
+    return ForceClose;
+  } else if (retval) {
+    //    LOG_F(INFO, "Data is available now.\n");
+    if (FD_ISSET(this->m_sock, &rfds)) {
+      int count;
+      ioctl(this->m_sock, FIONREAD, &count);
+      if (!count) {
+        return LostConnection;
+      } else {
+        LOG_F(INFO, "%d bytes available..", count);
+        return DataAvailable;
+      }
+    } else {
+      return Timeout;
+    }
+  }
+  return Connected;
+}
+
+/**
+ * @brief Socket::clientSendMessage
+ * @return
+ */
+int Socket::clientSendMessage(void) {
+  if (this->ConStatus() == Connected) {
+    send(m_sock, const_cast<char *>(m_message.c_str()), strlen(const_cast<char *>(m_message.c_str())), 0);
+  } else {
     return -1;
   }
 
-  if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-    LOG_F(ERROR, "\nConnection Failed \n");
-    return -1;
-  }
-
-  send(sock, const_cast<char *>(m_message.c_str()), strlen(const_cast<char *>(m_message.c_str())), 0);
-
-  valread = read(sock, buffer, 1024);
   return 0;
 }
 
+/**
+ * @brief Socket::clientReadMessage
+ */
+void Socket::clientReadMessage() {
+  char *buffer;
+  int len = 1024;
+
+  if (len > 0) {
+    buffer = (char *)malloc((len + 1) * sizeof(char));
+
+    /* Read message */
+    read(this->m_sock, buffer, len);
+    DApplication::parseMessageReceive(buffer);
+    free(buffer);
+  }
+}
+
+/**
+ * @brief Socket::serverProcessRequest
+ * @param ptr
+ * @return
+ */
 void *Socket::serverProcessRequest(void *ptr) {
   char *buffer;
   int len = 1024;

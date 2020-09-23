@@ -2,12 +2,17 @@
 #include "loguru.hpp"
 #include <stdio.h>
 
+static const string base64_chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "abcdefghijklmnopqrstuvwxyz"
+    "0123456789+/";
+
 /**
  * @brief PrinterProtocol::PrinterProtocol
  */
-PrinterProtocol::PrinterProtocol() {
+PrinterProtocol::PrinterProtocol()
+    : m_type(0), m_cyan_level(0), m_magenta_level(0), m_yellow_level(0), m_black_level(0) {
   jobj_actual = json_object_new_object();
-  jobj_previous = json_object_new_object();
 }
 
 void PrinterProtocol::create_json_object(struct json_object *jobj, const char *a, void *b, int variable_b_type) {
@@ -60,44 +65,38 @@ void PrinterProtocol::prepare_json_object(void) {
     "date": "2020-08-10T20:00:31Z"
 */
 
-  create_json_object(jobj_actual, "type", (void *)type(), Type::Int);
-  create_json_object(jobj_actual, "serial", (void *)serial().c_str(), Type::String);
-  create_json_object(jobj_actual, "description", (void *)description().c_str(), Type::String);
-  create_json_object(jobj_actual, "connected", (void *)connected(), Type::Boolean);
-  create_json_object(jobj_actual, "prints", (void *)prints(), Type::Int);
-  create_json_object(jobj_actual, "state", (void *)state().c_str(), Type::String);
-  create_json_object(jobj_actual, "error", (void *)error().c_str(), Type::String);
-  create_json_object(jobj_actual, "supply_type", (void *)supply_type().c_str(), Type::String);
-  create_json_object(jobj_actual, "cyan_level", &m_cyan_level, Type::Double);
-  create_json_object(jobj_actual, "magenta_level", &m_magenta_level, Type::Double);
-  create_json_object(jobj_actual, "yellow_level", &m_yellow_level, Type::Double);
-  create_json_object(jobj_actual, "black_level", &m_black_level, Type::Double);
-
-  if (json_object_equal(jobj_actual, jobj_previous) != 1) {
-    // Copy jobj_actual to jobj_previous
-    jobj_previous = json_tokener_parse(json_object_get_string(jobj_actual));
-
-    cout << "jobj_previous from str:" << endl;
-    cout << "---" << endl;
-    cout << json_object_to_json_string_ext(jobj_previous, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY) << endl;
-    cout << "---" << endl;
-
-    // cout << "jobj_actual from str:" << endl;
-    // cout << "---" << endl;
-    // cout << json_object_to_json_string_ext(jobj_actual, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY) << endl;
-    // cout << "---" << endl;
-
-    setJson_message(json_object_to_json_string_ext(jobj_actual, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
-
-    cout << "jobj_actual from str:" << endl;
-    cout << "---" << endl;
-    cout << m_json_message << endl;
-    cout << "---" << endl;
+  if (connected() == true) {
+    create_json_object(jobj_actual, "type", (void *)type(), Type::Int);
+    create_json_object(jobj_actual, "serial", (void *)serial().c_str(), Type::String);
+    create_json_object(jobj_actual, "description", (void *)description().c_str(), Type::String);
+    create_json_object(jobj_actual, "connected", (void *)("true"), Type::String);
+    create_json_object(jobj_actual, "prints", (void *)prints(), Type::Int);
+    create_json_object(jobj_actual, "state", (void *)state().c_str(), Type::String);
+    create_json_object(jobj_actual, "error", (void *)error().c_str(), Type::String);
+    create_json_object(jobj_actual, "supply_type", (void *)supply_type().c_str(), Type::String);
+    create_json_object(jobj_actual, "cyan_level", &m_cyan_level, Type::Double);
+    create_json_object(jobj_actual, "magenta_level", &m_magenta_level, Type::Double);
+    create_json_object(jobj_actual, "yellow_level", &m_yellow_level, Type::Double);
+    create_json_object(jobj_actual, "black_level", &m_black_level, Type::Double);
+    create_json_object(jobj_actual, "date", (void *)date().c_str(), Type::String);
   } else {
-    cout << "---" << endl;
-    cout << "jobj_actual and job_actual are equals:" << endl;
-    cout << "---" << endl;
+    json_object_object_del(jobj_actual, "description");
+    json_object_object_del(jobj_actual, "serial");
+    json_object_object_del(jobj_actual, "prints");
+    json_object_object_del(jobj_actual, "state");
+    json_object_object_del(jobj_actual, "error");
+    json_object_object_del(jobj_actual, "supply_type");
+    json_object_object_del(jobj_actual, "cyan_level");
+    json_object_object_del(jobj_actual, "magenta_level");
+    json_object_object_del(jobj_actual, "yellow_level");
+    json_object_object_del(jobj_actual, "black_level");
+    create_json_object(jobj_actual, "type", (void *)type(), Type::Int);
+    create_json_object(jobj_actual, "connected", (void *)("false"), Type::String);
+    create_json_object(jobj_actual, "date", (void *)date().c_str(), Type::String);
   }
+
+  // Copy jobj_actual to jobj_previous
+  setJson_message(json_object_to_json_string_ext(jobj_actual, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
 }
 
 void PrinterProtocol::string_parse_json_object(char *str) { m_jobj = json_tokener_parse(str); }
@@ -243,4 +242,19 @@ string PrinterProtocol::base64_encode(unsigned char const *bytes_to_code, unsign
     while ((i++ < 3)) ret += '=';
   }
   return ret;
+}
+
+/**
+ * @brief PrinterProtocol::DateTime
+ */
+void PrinterProtocol::DateTime(void) {
+  struct tm *date_time;
+  time_t seconds;
+
+  time(&seconds);
+  date_time = localtime(&seconds);
+
+  m_datetime = to_string(date_time->tm_year + 1900) + '-' + to_string(date_time->tm_mon + 1) + '-' +
+               to_string(date_time->tm_mday) + 'T' + to_string(date_time->tm_hour) + ':' +
+               to_string(date_time->tm_min) + ':' + to_string(date_time->tm_sec) + 'Z';
 }

@@ -19,8 +19,10 @@ using namespace std;
 
 class Socket {
  public:
-  Socket();
+  enum CConnectionState { LostConnection = -9, ForceClose, Timeout, Disconnected, Connected = 0, DataAvailable };
 
+ public:
+  Socket();
   inline uint64_t port() { return m_port; }
   inline void setPort(const uint64_t port) { m_port = port; }
 
@@ -30,7 +32,14 @@ class Socket {
   inline string message() { return m_message; }
   inline void setMessage(string message) { m_message = message; }
 
-  int Client(void);
+  inline CConnectionState ConStatus() const { return m_ConStatus; }
+  inline void changeConStatus(CConnectionState status) { m_ConStatus = status; }
+
+  bool clientConnect(void);
+  void clientClose(void);
+  CConnectionState clientSelect(void);
+  int clientSendMessage(void);
+  void clientReadMessage(void);
   int Server(void);
   static void* serverProcessRequest(void* ptr);
 
@@ -38,11 +47,10 @@ class Socket {
   uint64_t m_port;
   char* m_address;
   string m_message;
+  CConnectionState m_ConStatus;
 
   struct sockaddr_in serv_addr;
-  char buffer[1024] = {0};
-  int sock;
-  int valread;
+  int m_sock;
 
   typedef struct {
     int sock;

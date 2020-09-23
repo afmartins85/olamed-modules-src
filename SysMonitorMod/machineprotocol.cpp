@@ -63,7 +63,8 @@ void MachineProtocol::prepare_json_object(void) {
   create_json_object(jobj_actual, "free_ram", (void *)free_ram(), Type::Int); 
   create_json_object(jobj_actual, "fan_speed", (void *)fan_speed(), Type::Int); 
   create_json_object(jobj_actual, "cpu_temperature", (void *)&m_cpu_temperature, Type::Double); 
-  create_json_object(jobj_actual, "journal_err", (void *)journal_err(), Type::Int); 
+  create_json_object(jobj_actual, "journal_err", (void *)journal_err(), Type::Int);
+  create_json_object(jobj_actual, "graceful_shutdown", (void *)graceful_shutdown().c_str(), Type::String);
   create_json_object(jobj_actual, "date", (void *)date().c_str(), Type::String); 
 
   //TO DO

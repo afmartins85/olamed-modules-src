@@ -120,6 +120,21 @@ void MachineInfo::JournalErrors(void) {
   fclose(p);
 }
 
+void MachineInfo::GracefulShutdown(void) {
+    FILE* p = Process("systemctl is-active check_graceful & echo GOOD || echo BAD");
+    char buffer[1024];
+
+    fgets(buffer, 1024, p);
+
+    for(char c: buffer) {
+        if(c != '\n')
+            m_gracefulShutdown.push_back(c);
+    }
+
+    printf(" => %s\n", m_gracefulShutdown.c_str());
+    fclose(p);
+}
+
 FILE * MachineInfo::Process(const char* cmd) {
 
   int fd[2];
@@ -156,6 +171,7 @@ void MachineInfo::PrintInfoSystem() {
   LOG_F(INFO, "TotalRAM %lu B", this->m_ram_total);
   LOG_F(INFO, "TotalFlash %lu B", this->m_flash_total);
   LOG_F(INFO, "JournalErrors %d ERROR(S)", this->m_journalErrors);
+  LOG_F(INFO, "GracefulShutdown %s", this->m_gracefulShutdown.c_str());
 }
 
 /**

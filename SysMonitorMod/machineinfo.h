@@ -58,6 +58,9 @@ class MachineInfo {
   inline int journalErrors() const { return m_journalErrors; }
   inline void setJournalErrors(int journalErrors) { m_journalErrors = journalErrors; }
 
+  inline string gracefulShutdown() { return m_gracefulShutdown;}
+  inline void setGracefulShutdown(string gracefulShutdown) { m_gracefulShutdown = gracefulShutdown; }
+
   void CPUTemperature(void);
   void CPUFanSpeed(void);
   void RAM_MemoryTotalVerify(void);
@@ -65,6 +68,7 @@ class MachineInfo {
   void FLASH_MemoryTotalVerify(void);
   void FLASH_MemoryFreeVerify(void);
   void JournalErrors(void);
+  void GracefulShutdown(void);
 
   void PrintInfoSystem();
   void ReadStatsCPU(std::vector<CPUData> &entries);
@@ -85,6 +89,7 @@ class MachineInfo {
   string m_saveFilesPath;
   string m_datetime;
   int m_journalErrors;
+  string m_gracefulShutdown;
 
   FILE * Process(const char* cmd);
 };

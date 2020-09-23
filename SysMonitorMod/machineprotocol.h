@@ -38,6 +38,9 @@ class MachineProtocol {
 
     inline int64_t journal_err() const { return m_journal_err; }
     inline void setJournal_err(int64_t journal_err) { m_journal_err = journal_err; }
+
+    inline string graceful_shutdown() { return m_graceful_shutdown; }
+    inline void setGraceful_shutdown(const string &graceful_shutdown) { m_graceful_shutdown = graceful_shutdown; }
     
     inline string json_message() const { return m_json_message; }
     inline void setJson_message(const string &json_message) { m_json_message = json_message; }
@@ -55,6 +58,7 @@ class MachineProtocol {
     double m_cpu_temperature;
     string m_date;
     int64_t m_journal_err;
+    string m_graceful_shutdown;
     string m_json_message;
     struct json_object *jobj_actual;
     struct json_object *jobj_previous;

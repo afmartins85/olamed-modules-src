@@ -91,6 +91,8 @@ void DApplication::exec() {
 
     this->m_ptr_MachineInfo->JournalErrors();
 
+    this->m_ptr_MachineInfo->GracefulShutdown();
+
     this->m_ptr_MachineProtocol->setType(3);
     this->m_ptr_MachineProtocol->setTotal_disk(this->m_ptr_MachineInfo->flash_avaliable());
     this->m_ptr_MachineProtocol->setFree_disk(this->m_ptr_MachineInfo->flash_total());
@@ -100,6 +102,7 @@ void DApplication::exec() {
     this->m_ptr_MachineProtocol->setCPU_temperature(this->m_ptr_MachineInfo->system());
     this->m_ptr_MachineProtocol->setDate(this->m_ptr_MachineInfo->datetime());
     this->m_ptr_MachineProtocol->setJournal_err(this->m_ptr_MachineInfo->journalErrors());
+    this->m_ptr_MachineProtocol->setGraceful_shutdown(this->m_ptr_MachineInfo->gracefulShutdown());
 
     this->m_ptr_MachineProtocol->prepare_json_object();
 

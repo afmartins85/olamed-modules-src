@@ -248,13 +248,10 @@ string PrinterProtocol::base64_encode(unsigned char const *bytes_to_code, unsign
  * @brief PrinterProtocol::DateTime
  */
 void PrinterProtocol::DateTime(void) {
-  struct tm *date_time;
-  time_t seconds;
+  char buf[100];
+  time_t now;
 
-  time(&seconds);
-  date_time = localtime(&seconds);
-
-  m_datetime = to_string(date_time->tm_year + 1900) + '-' + to_string(date_time->tm_mon + 1) + '-' +
-               to_string(date_time->tm_mday) + 'T' + to_string(date_time->tm_hour) + ':' +
-               to_string(date_time->tm_min) + ':' + to_string(date_time->tm_sec) + 'Z';
+  time(&now);
+  strftime(buf, sizeof (buf), "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
+  m_datetime = buf;
 }

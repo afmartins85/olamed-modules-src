@@ -11,6 +11,7 @@
 #include <time.h>
 #include <vector>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #define NUM_CPU_STATES 10
 

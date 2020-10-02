@@ -153,7 +153,8 @@ FILE * MachineInfo::Process(const char* cmd) {
     close(write_fd);
     execl("/bin/sh", "sh", "-c", cmd, NULL);
     return NULL;
-  } else { 
+  } else {
+    wait(&pid);
     close(write_fd);
     return fdopen(read_fd, "r");
   } 

@@ -1,0 +1,12 @@
+[Unit]
+Description=PrinterMod service
+
+[Service]
+User=root
+WorkingDirectory=/usr/local/bin/
+ExecStart=printer-mod.sh
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

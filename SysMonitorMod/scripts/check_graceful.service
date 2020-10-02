@@ -1,0 +1,14 @@
+[Unit]
+Description=Check if previous system shutdown was graceful
+ConditionPathExists=/root/graceful_shutdown
+RefuseManualStart=true
+RefuseManualStop=true
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/bin/rm /root/graceful_shutdown
+
+[Install]
+WantedBy=multi-user.target
+

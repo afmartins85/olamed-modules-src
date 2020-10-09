@@ -20,7 +20,7 @@ class DApplication {
 
   void exec();
 
-  static void parseMessageReceive(char*);
+  static void parseMessageReceive(const char*);
   static void* printServerListen(void* arg);
   void startServer();
   string fileExtension(string);

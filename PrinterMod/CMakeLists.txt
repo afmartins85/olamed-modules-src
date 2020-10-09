@@ -5,6 +5,19 @@ project(PrinterMod LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(PROJECT_VERSION_MAJOR "0")
+set(PROJECT_VERSION_MINOR "1")
+set(PROJECT_VERSION_PATCH "0")
+set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+
+include(CheckSymbolExists)
+include(CheckIncludeFile)
+include(CheckIncludeFiles)
+include(CheckCSourceCompiles)
+include(CheckTypeSize)
+include(CPack)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 include(cmake/Utils.cmake)
 
 #Here we add a Cmake Module abble to find GSOAP on your system, and find it

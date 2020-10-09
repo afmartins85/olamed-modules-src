@@ -3,6 +3,7 @@
 #include "printerprotocol.h"
 #include <chrono>
 #include <cups/cups.h>
+#include <fcntl.h>
 #include <iostream>
 #include <string.h>
 #include <string>
@@ -377,7 +378,7 @@ void PrinterDevice::printFileFromQueue(PrinterDevice::printer_data_t *printer_da
  */
 void PrinterDevice::saveFile(const std::string &path, const std::string &fname, const std::string &id,
                              const std::string &content) {
-  FILE *fp;
+  //  FILE *fp;
   std::string file;
 
   file.insert(0, path);
@@ -389,10 +390,16 @@ void PrinterDevice::saveFile(const std::string &path, const std::string &fname, 
   // Insert file in print queue
   this->m_printQueue.insert({id, file});
 
-  fp = fopen(file.c_str(), "wb");
+  //  fp = fopen(file.c_str(), "a");
 
-  fprintf(fp, "%s", (PrinterProtocol::base64_decode(content)).c_str());
-  fclose(fp);
+  int fd = open(file.c_str(), O_CREAT | O_RDWR);
+
+  string fDecoded = PrinterProtocol::base64_decode(content);
+  write(fd, fDecoded.c_str(), fDecoded.size());
+  close(fd);
+  //  fwrite(fDecoded.c_str(), fDecoded.size(), 1, fp);
+  //  fprintf(fp, "%s", (PrinterProtocol::base64_decode(content)).c_str());
+  //  fclose(fp);
 }
 
 /**

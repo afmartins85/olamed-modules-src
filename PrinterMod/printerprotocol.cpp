@@ -69,7 +69,7 @@ void PrinterProtocol::prepare_json_object(void) {
     create_json_object(jobj_actual, "type", (void *)type(), Type::Int);
     create_json_object(jobj_actual, "serial", (void *)serial().c_str(), Type::String);
     create_json_object(jobj_actual, "description", (void *)description().c_str(), Type::String);
-    create_json_object(jobj_actual, "connected", (void *)("true"), Type::String);
+    create_json_object(jobj_actual, "connected", (void *)(true), Type::Boolean);
     create_json_object(jobj_actual, "prints", (void *)prints(), Type::Int);
     create_json_object(jobj_actual, "state", (void *)state().c_str(), Type::String);
     create_json_object(jobj_actual, "error", (void *)error().c_str(), Type::String);
@@ -91,7 +91,7 @@ void PrinterProtocol::prepare_json_object(void) {
     json_object_object_del(jobj_actual, "yellow_level");
     json_object_object_del(jobj_actual, "black_level");
     create_json_object(jobj_actual, "type", (void *)type(), Type::Int);
-    create_json_object(jobj_actual, "connected", (void *)("false"), Type::String);
+    create_json_object(jobj_actual, "connected", (void *)(false), Type::Boolean);
     create_json_object(jobj_actual, "date", (void *)date().c_str(), Type::String);
   }
 
@@ -99,7 +99,7 @@ void PrinterProtocol::prepare_json_object(void) {
   setJson_message(json_object_to_json_string_ext(jobj_actual, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
 }
 
-void PrinterProtocol::string_parse_json_object(char *str) { m_jobj = json_tokener_parse(str); }
+void PrinterProtocol::string_parse_json_object(const char *str) { m_jobj = json_tokener_parse(str); }
 
 void *PrinterProtocol::value_json_object(const char *key) {
   /* PrintProtocol JSON:
@@ -252,6 +252,6 @@ void PrinterProtocol::DateTime(void) {
   time_t now;
 
   time(&now);
-  strftime(buf, sizeof (buf), "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
+  strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
   m_datetime = buf;
 }

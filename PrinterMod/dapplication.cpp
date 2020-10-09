@@ -17,8 +17,8 @@ DApplication::DApplication() {
   this->m_ptrDevice = new PrinterDevice;
   m_ptr_Socket = new Socket;
   this->m_ptr_Socket->setPort(8080);
-  //  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
-  this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
+  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
+  //  this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
   this->m_pathFile = "/usr/local/share/printerMod/printQueue/";
   this->m_lifeCount = 0;
 }
@@ -36,8 +36,8 @@ DApplication::DApplication(int argc, char *argv[]) {
   this->m_ptrDevice = new PrinterDevice;
   m_ptr_Socket = new Socket;
   this->m_ptr_Socket->setPort(8080);
-  //  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
-  this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
+  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
+  //  this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
   this->m_pathFile = "/usr/local/share/printerMod/printQueue/";
   this->m_lifeCount = 0;
 }
@@ -195,7 +195,7 @@ void DApplication::exec() {
 /**
  * @brief DApplication::parseMessageReceive
  */
-void DApplication::parseMessageReceive(char *message) {
+void DApplication::parseMessageReceive(const char *message) {
   DApplication *app = getInstance();
   LOG_SCOPE_FUNCTION(INFO);
   if (app != nullptr) {

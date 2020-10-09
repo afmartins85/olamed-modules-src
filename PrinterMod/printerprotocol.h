@@ -151,7 +151,7 @@ class PrinterProtocol : public SupplyPrinter {
 
   void create_json_object(struct json_object *jobj, const char *a, void *b, int variable_b_type);
   void prepare_json_object(void);
-  void string_parse_json_object(char *str);
+  void string_parse_json_object(const char *str);
   void *value_json_object(const char *key);
 
   static string base64_decode(string const &encoded_string);

@@ -40,6 +40,9 @@ bool Socket::clientConnect() {
     LOG_F(ERROR, "Connection Failed. SyncMod can be down!!");
     return false;
   }
+
+  std::string handshake("PrinterMod");
+  send(m_sock, handshake.c_str(), handshake.size(), 0);
   return true;
 }
 
@@ -110,17 +113,36 @@ int Socket::clientSendMessage(void) {
  * @brief Socket::clientReadMessage
  */
 void Socket::clientReadMessage() {
-  char *buffer;
-  int len = 1024;
+  string buffer;
+  char ch;
+  int braces = 0;
 
-  if (len > 0) {
-    buffer = (char *)malloc((len + 1) * sizeof(char));
-
+  while (1) {
     /* Read message */
-    read(this->m_sock, buffer, len);
-    DApplication::parseMessageReceive(buffer);
-    free(buffer);
+    read(this->m_sock, &ch, 1);
+    if (ch == '{') {
+      braces++;
+    } else if (ch == '}') {
+      if (braces > 0) {
+        braces--;
+      }
+    }
+    buffer.push_back(ch);
+    if (!braces) {
+      break;
+    }
   }
+
+  buffer.push_back('\0');
+
+  printf("\n");
+  printf("\n");
+  printf("\n");
+  printf("%s", buffer.c_str());
+  printf("\n");
+  printf("\n");
+  printf("\n");
+  DApplication::parseMessageReceive(buffer.c_str());
 }
 
 /**

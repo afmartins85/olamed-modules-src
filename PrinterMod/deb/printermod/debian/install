@@ -1,0 +1,8 @@
+src/printer-mod.service etc/systemd/system
+src/libjson-c.so.5.1.0 usr/lib/x86_64-linux-gnu
+src/PrinterMod usr/bin
+src/snmp/sbin/snmp* usr/local/sbin
+src/snmp/bin/* usr/local/bin
+src/snmp/lib/lib* usr/local/lib
+src/snmp/local/share/snmp/mibs/* usr/local/share/snmp/mibs
+

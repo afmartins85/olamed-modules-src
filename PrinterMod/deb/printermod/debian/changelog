@@ -1,0 +1,5 @@
+printermod (0.1.0-1) unstable; urgency=medium
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Anderson Fagundes Martins <anderson.fagundes@truetechsystems.com.br>  Fri, 02 Oct 2020 03:06:33 -0300

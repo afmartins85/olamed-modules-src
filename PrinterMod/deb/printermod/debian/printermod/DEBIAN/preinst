@@ -1,0 +1,5 @@
+#!/bin/sh
+
+mkdir -p /var/lib/snmp/mibs/iana
+mkdir -p /var/lib/snmp/mibs/ietf
+mkdir -p /usr/share/snmp/mibs

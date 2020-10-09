@@ -1,0 +1,6 @@
+libjson-c 5 printermod
+libnetsnmp 35 printermod
+libnetsnmpagent 35 printermod
+libnetsnmphelpers 35 printermod
+libnetsnmpmibs 35 printermod
+libnetsnmptrapd 35 printermod

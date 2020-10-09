@@ -1,0 +1,4 @@
+perl:Depends=perl:any
+shlibs:Depends=libc6 (>= 2.25), libcups2 (>= 1.6.0), libgcc1 (>= 1:3.0), libnl-3-200 (>= 3.2.7), libpcre3, libssl1.1 (>= 1.1.0), libstdc++6 (>= 6), printermod
+misc:Depends=
+misc:Pre-Depends=

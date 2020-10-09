@@ -1,0 +1,24 @@
+#!/bin/sh
+
+mkdir -p /usr/local/share/printerMod/printQueue
+ln -s /usr/lib/x86_64-linux-gnu/libjson-c.so.5.1.0 libjson-c.so.5 > /dev/null
+ln -s /usr/lib/x86_64-linux-gnu/libjson-c.so.5 libjson-c.so > /dev/null
+
+ln -s usr/local/bin/snmptrap snmpinform > /dev/null
+ln -s usr/local/bin/snmpps snmptop > /dev/null
+
+
+ln -s usr/local/lib/libnetsnmpagent.so.35.0.0 libnetsnmpagent.so > /dev/null
+ln -s  usr/local/lib/libnetsnmpagent.so.35.0.0 libnetsnmpagent.so.35 > /dev/null
+ln -s usr/local/lib/libnetsnmphelpers.so.35.0.0 libnetsnmphelpers.so > /dev/null
+ln -s usr/local/lib/libnetsnmphelpers.so.35.0.0 libnetsnmphelpers.so.35 > /dev/null
+ln -s usr/local/lib/libnetsnmpmibs.so.35.0.0 libnetsnmpmibs.so > /dev/null
+ln -s usr/local/lib/libnetsnmpmibs.so.35.0.0 libnetsnmpmibs.so.35 > /dev/null
+ln -s usr/local/lib/libnetsnmp.so.35.0.0 libnetsnmp.so > /dev/null
+ln -s usr/local/lib/libnetsnmp.so.35.0.0 libnetsnmp.so.35 > /dev/null
+ln -s usr/local/lib/libnetsnmptrapd.so.35.0.0 libnetsnmptrapd.so > /dev/null
+ln -s usr/local/lib/libnetsnmptrapd.so.35.0.0 libnetsnmptrapd.so.35 > /dev/null
+
+
+systemctl daemon-reload
+systemctl enable printer-mod

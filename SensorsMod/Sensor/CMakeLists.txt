@@ -5,8 +5,8 @@ SET(TOTH_DIR ${PROJECT_TOP_DIR}/TOTH)
 
 SET(TOTH_COMMON_SRC
         ${TOTH_COMMON_SRC}
-        ${TOTH_DIR}/tothspo2.h
-        ${TOTH_DIR}/tothspo2.cpp
+        ${TOTH_DIR}/tothmonitor.h
+        ${TOTH_DIR}/tothmonitor.cpp
         PARENT_SCOPE
 	)
 ADD_DEFINITIONS( -std=c++11 )

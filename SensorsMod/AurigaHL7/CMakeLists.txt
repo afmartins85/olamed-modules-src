@@ -18,6 +18,7 @@ SET(HL7_COMMON_INCLUDE
     ${COMMON_DIR}/hl7mllp.h
     ${COMMON_DIR}/dataencode.h
     ${COMMON_DIR}/validation.h
+    ${PROJECT_TOP_DIR}/hl7basedecode.h
     )
 
 SET(HL7_COMMON_SRC
@@ -29,6 +30,7 @@ SET(HL7_COMMON_SRC
 	${COMMON_DIR}/validation.cpp
         ${HL7_COMMON_INCLUDE}
         ${SRC_24_DIR_HEADERS}
+        ${PROJECT_TOP_DIR}/hl7basedecode.cpp
         PARENT_SCOPE
 	)
 ADD_DEFINITIONS( -std=c++11 )

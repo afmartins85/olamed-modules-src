@@ -1,6 +1,6 @@
 #include "dapplication.h"
-#include "SpO2Mod/TOTH/tothspo2.h"
-#include "healtsensors.h"
+#include "Sensor/TOTH/tothmonitor.h"
+#include "healthsensors.h"
 #include "loguru.hpp"
 #include <chrono>
 #include <iostream>
@@ -58,27 +58,12 @@ DApplication *DApplication::getInstance(int argc, char *argv[]) {
   return instance_;
 }
 
-void *DApplication::serverListen(void *ptr) {
-  pthread_setname_np(pthread_self(), __FUNCTION__);
-  Socket *sock = reinterpret_cast<Socket *>(ptr);
-  sock->Server();
-  pthread_exit(NULL);
-}
-
-void DApplication::startServer() {
-  pthread_t ptid;
-  pthread_create(&ptid, NULL, &serverListen, &m_ptr_Socket);
-  pthread_detach(ptid);
-}
-
 /**
  * @brief DApplication::exec
  */
 void DApplication::exec() {
 
-  HealtSensors *sensors = new TothSpO2;
-
-  sensors->getSpO2();
+  HealthSensors *sensors = new TothMonitor;
 
   LOG_SCOPE_FUNCTION(INFO);
   LOG_F(INFO, "Sensors Daemon Started!!");
@@ -112,18 +97,6 @@ void DApplication::exec() {
       }
       break;
     }
-  }
-}
-
-/**
- * @brief DApplication::parseMessageReceive
- */
-void DApplication::parseMessageReceive(const char *message) {
-  DApplication *app = getInstance();
-  (void)message;
-  LOG_SCOPE_FUNCTION(INFO);
-  if (app != nullptr) {
-    LOG_F(ERROR, "App context is null!!!");
   }
 }
 

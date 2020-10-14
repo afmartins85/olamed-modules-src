@@ -54,18 +54,14 @@ struct HL7MLLP : private HL7Socket {
     bool bFinish = false;
 
     size_t n = read_msg(buffer);
-    std::cout << "Raw Receive: " << buffer << std::endl;
-    //    for (size_t i = 0; i < buffer.size(); ++i) {
-    //      printf("%02X", buffer.at(i));
-    //    }
-    //    printf("\n");
     if (n == -1)
       return n;
     while (n > 0) {
       size_t iS = 0;
       if (bStart) {
-        while ((buffer[iS] != 0x0b) && (iS < n))
+        while ((buffer[iS] != 0x0b) && (iS < n)) {
           iS++;
+        }
         if ((iS + 1) < n) {
           bStart = false;
           bFinish = true;
@@ -82,18 +78,14 @@ struct HL7MLLP : private HL7Socket {
           }
           iF++;
         }
-        data = buffer;
+        // data = buffer;
       }
-      data = buffer.c_str() + iS + 1;
+      // data = buffer.c_str() + iS + 1;
+      data.append(buffer);
       if (!bStart && !bFinish)
         break;
       buffer.clear();
       n = read_msg(buffer);
-      std::cout << "Raw Receive: " << buffer << std::endl;
-      //      for (size_t i = 0; i < buffer.size(); ++i) {
-      //        printf("%02X", buffer.at(i));
-      //      }
-      //      printf("\n");
     }
     return data.length();
   }

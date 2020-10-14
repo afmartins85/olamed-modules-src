@@ -160,7 +160,6 @@ void *Socket::serverProcessRequest(void *ptr) {
     /* Read message */
     read(conn->sock, buffer, len);
 
-    DApplication::parseMessageReceive(buffer);
     free(buffer);
   }
 

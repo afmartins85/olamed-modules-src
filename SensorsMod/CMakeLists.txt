@@ -31,7 +31,7 @@ file(GLOB sensorsMod_SOURCES
     )
 
 add_subdirectory(AurigaHL7)
-add_subdirectory(SpO2Mod)
+add_subdirectory(Sensor)
 #add_dependencies(sensorsMod AurigaHL7)
 
 pkg_check_modules(PC_JSONC json-c)

@@ -39,7 +39,7 @@
 #include <iostream>
 #include <string>
 
-#define MAX_INSIDE_BUFFER_LEN 256
+#define MAX_INSIDE_BUFFER_LEN 1024
 
 #ifdef WIN32
 #ifndef TESTS
@@ -225,14 +225,15 @@ struct HL7SocketServer {
  */
 // void socket_test() {
 //  std::string hl7_message =
-//            "MSH|^~\\&|system1|W|system2|UHN|200105231927||ADT^A01^ADT_A01|22139243|P|2.4\t\
+//                "MSH|^~\\&|system1|W|system2|UHN|200105231927||ADT^A01^ADT_A01|22139243|P|2.4\t\
 //EVN|A01|200105231927|\t\
 //PID||9999999999^^|2216506^||Duck^Donald^^^MR.^MR.||19720227|M|||123 Foo
-// ST.^^TORONTO^ON^M6G 3E6^CA^H^~123 Foo ST.^^TORONTO^ON^M6G 3E6^CA^M^|1811|( 416
-// )111 - 1111||E^ENGLISH|S|PATIENT DID NOT INDICATE|211004554^||||||||||||\t\
+// ST.^^TORONTO^ON^M6G 3E6^CA^H^~123 Foo ST.^^TORONTO^ON^M6G 3E6^CA^M^|1811|(
+// 416
+//   )111 - 1111||E^ENGLISH|S|PATIENT DID NOT INDICATE|211004554^||||||||||||\t\
 //PV1|||ZFAST TRACK^WAITING^13|E^EMERGENCY||369^6^13^U EM EMERGENCY
 // DEPARTMENT^ZFAST TRACK WAITING^FT WAIT 13^FTWAIT13^FT
-// WAITING^FTWAIT13|^MOUSE^MICKEY^M^^DR.^MD|||SUR||||||||I|211004554^||||||||||||||||||||W|||||200105231927|||||\t\
+//       WAITING^FTWAIT13|^MOUSE^MICKEY^M^^DR.^MD|||SUR||||||||I|211004554^||||||||||||||||||||W|||||200105231927|||||\t\
 //PV2||F|^R / O APPENDICIAL ABSCESS|||||||||||||||||||||||||\t\
 //IN1|1||001001|OHIP||||||||||||^^^^^|||^^^^^^M^|||||||||||||||||||||||||^^^^^^M^|||||\t\
 //ACC|";

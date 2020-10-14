@@ -17,11 +17,6 @@ public:
 
   void exec();
 
-  static void *serverListen(void *arg);
-  static void parseMessageReceive(const char *message);
-
-  void startServer();
-
 protected:
 private:
   static DApplication *instance_;

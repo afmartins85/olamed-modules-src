@@ -44,17 +44,18 @@ void *TothMonitor::sensorListen(void *arg) {
         stateMonitorConnected = false;
         close(monitor->m_client->getSocket());
       } else {
-        //        std::cout << data << std::endl;
-        //        std::cout << __LINE__ << " received: " << data.size() <<
-        //        std::endl; printf("\n"); printf("\n"); for (size_t i = 0; i <
-        //        data.size(); ++i) {
-        //          printf("0x%02X ", data.at(i));
-        //          if (!(i % 16)) {
-        //            printf("\n");
-        //          }
-        //        }
-        //        printf("\n");
+        //std::cout << data << std::endl;
+        //std::cout << __LINE__ << " received: " << data.size() <<
+        //std::endl; printf("\n"); printf("\n"); for (size_t i = 0; i <
+        //data.size(); ++i) {
+        //  printf("0x%02X ", data.at(i));
+        //  if (!(i % 16)) {
+        //    printf("\n");
+        //  }
+        //}
+        //printf("\n");
         monitor->identifyMessage(data);
+        monitor->ObservationOrResult(data);
       }
     }
     usleep(10);

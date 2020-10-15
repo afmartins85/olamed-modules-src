@@ -88,8 +88,10 @@ set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
         OWNER_EXECUTE
         GROUP_READ
         GROUP_EXECUTE
+        GROUP_WRITE
         WORLD_READ
         WORLD_EXECUTE
+        WORLD_WRITE
    )
 
 if (UNIX OR MINGW OR CYGWIN)
@@ -102,5 +104,5 @@ if (UNIX OR MINGW OR CYGWIN)
     SET(VERSION ${PROJECT_VERSION})
 #    configure_file(json-c.pc.in json-c.pc @ONLY)
 #    set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
-    install(FILES ${PROJECT_BINARY_DIR}/SensorsMod DESTINATION "/home/olamed/sensorsMod")
+    install(FILES ${PROJECT_BINARY_DIR}/sensorsMod DESTINATION "/home/olamed/sensorsMod")
 endif ()

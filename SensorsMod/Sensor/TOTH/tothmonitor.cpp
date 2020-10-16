@@ -44,18 +44,19 @@ void *TothMonitor::sensorListen(void *arg) {
         stateMonitorConnected = false;
         close(monitor->m_client->getSocket());
       } else {
-        //std::cout << data << std::endl;
-        //std::cout << __LINE__ << " received: " << data.size() <<
-        //std::endl; printf("\n"); printf("\n"); for (size_t i = 0; i <
-        //data.size(); ++i) {
-        //  printf("0x%02X ", data.at(i));
-        //  if (!(i % 16)) {
-        //    printf("\n");
-        //  }
-        //}
-        //printf("\n");
+        // Identify message received
         monitor->identifyMessage(data);
-        monitor->ObservationOrResult(data);
+        if (monitor->getError() == HL7BaseError::MessageOk) {
+          // Get result records
+          monitor->ObservationOrResult(data);
+          if (monitor->getError() == HL7BaseError::MessageOk) {
+            // Send Acknowledge
+            monitor->sendAckMessage(monitor->m_mllp);
+            if (monitor->getError() == HL7BaseError::MessageOk) {
+              // TODO: informar o resultado para a camada de aplicação
+            }
+          }
+        }
       }
     }
     usleep(10);

@@ -15,7 +15,6 @@
  * along with Auriga HL7 library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef __MSH_v24_H__
 #define __MSH_v24_H__
 
@@ -34,10 +33,10 @@ namespace HL7_24 {
 
 /* Message Header */
 class MSH : public HL7Segment {
- public:
+public:
   MSH() { this->init(); }
 
- private:
+private:
   /* */
   enum FIELD_ID {
     MSH_1,
@@ -64,11 +63,11 @@ class MSH : public HL7Segment {
     FIELD_ID_MAX
   };
 
- public:
-  const char* className() const { return "MSH"; }
-  MSH* create() const { return new MSH(); }
+public:
+  const char *className() const { return "MSH"; }
+  MSH *create() const { return new MSH(); }
 
- private:
+private:
   void init() {
     setName("MSH");
     /* Init members */
@@ -95,18 +94,18 @@ class MSH : public HL7Segment {
     addObject<ID>(MSH_21, "MSH.21", HL7::optional, HL7::repetition_on);
   }
 
- public:
+public:
   /* Getters */
   /****************************************
    * Field Separator
    */
 
-  ST* getMSH_1(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, MSH_1);
+  ST *getMSH_1(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, MSH_1);
   }
 
-  ST* getFieldSeparator(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, MSH_1);
+  ST *getFieldSeparator(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, MSH_1);
   }
 
   bool isMSH_1(size_t index = 0) {
@@ -129,12 +128,12 @@ class MSH : public HL7Segment {
    * Encoding Characters
    */
 
-  ST* getMSH_2(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, MSH_2);
+  ST *getMSH_2(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, MSH_2);
   }
 
-  ST* getEncodingCharacters(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, MSH_2);
+  ST *getEncodingCharacters(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, MSH_2);
   }
 
   bool isMSH_2(size_t index = 0) {
@@ -157,12 +156,12 @@ class MSH : public HL7Segment {
    * Sending Application
    */
 
-  HD* getMSH_3(size_t index = 0) {
-    return (HD*)this->getObjectSafe(index, MSH_3);
+  HD *getMSH_3(size_t index = 0) {
+    return (HD *)this->getObjectSafe(index, MSH_3);
   }
 
-  HD* getSendingApplication(size_t index = 0) {
-    return (HD*)this->getObjectSafe(index, MSH_3);
+  HD *getSendingApplication(size_t index = 0) {
+    return (HD *)this->getObjectSafe(index, MSH_3);
   }
 
   bool isMSH_3(size_t index = 0) {
@@ -185,12 +184,12 @@ class MSH : public HL7Segment {
    * Sending Facility
    */
 
-  HD* getMSH_4(size_t index = 0) {
-    return (HD*)this->getObjectSafe(index, MSH_4);
+  HD *getMSH_4(size_t index = 0) {
+    return (HD *)this->getObjectSafe(index, MSH_4);
   }
 
-  HD* getSendingFacility(size_t index = 0) {
-    return (HD*)this->getObjectSafe(index, MSH_4);
+  HD *getSendingFacility(size_t index = 0) {
+    return (HD *)this->getObjectSafe(index, MSH_4);
   }
 
   bool isMSH_4(size_t index = 0) {
@@ -213,12 +212,12 @@ class MSH : public HL7Segment {
    * Receiving Application
    */
 
-  HD* getMSH_5(size_t index = 0) {
-    return (HD*)this->getObjectSafe(index, MSH_5);
+  HD *getMSH_5(size_t index = 0) {
+    return (HD *)this->getObjectSafe(index, MSH_5);
   }
 
-  HD* getReceivingApplication(size_t index = 0) {
-    return (HD*)this->getObjectSafe(index, MSH_5);
+  HD *getReceivingApplication(size_t index = 0) {
+    return (HD *)this->getObjectSafe(index, MSH_5);
   }
 
   bool isMSH_5(size_t index = 0) {
@@ -241,12 +240,12 @@ class MSH : public HL7Segment {
    * Receiving Facility
    */
 
-  HD* getMSH_6(size_t index = 0) {
-    return (HD*)this->getObjectSafe(index, MSH_6);
+  HD *getMSH_6(size_t index = 0) {
+    return (HD *)this->getObjectSafe(index, MSH_6);
   }
 
-  HD* getReceivingFacility(size_t index = 0) {
-    return (HD*)this->getObjectSafe(index, MSH_6);
+  HD *getReceivingFacility(size_t index = 0) {
+    return (HD *)this->getObjectSafe(index, MSH_6);
   }
 
   bool isMSH_6(size_t index = 0) {
@@ -269,12 +268,12 @@ class MSH : public HL7Segment {
    * Date/Time Of Message
    */
 
-  TS* getMSH_7(size_t index = 0) {
-    return (TS*)this->getObjectSafe(index, MSH_7);
+  TS *getMSH_7(size_t index = 0) {
+    return (TS *)this->getObjectSafe(index, MSH_7);
   }
 
-  TS* getDateTimeOfMessage(size_t index = 0) {
-    return (TS*)this->getObjectSafe(index, MSH_7);
+  TS *getDateTimeOfMessage(size_t index = 0) {
+    return (TS *)this->getObjectSafe(index, MSH_7);
   }
 
   bool isMSH_7(size_t index = 0) {
@@ -297,12 +296,12 @@ class MSH : public HL7Segment {
    * Security
    */
 
-  ST* getMSH_8(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, MSH_8);
+  ST *getMSH_8(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, MSH_8);
   }
 
-  ST* getSecurity(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, MSH_8);
+  ST *getSecurity(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, MSH_8);
   }
 
   bool isMSH_8(size_t index = 0) {
@@ -325,12 +324,12 @@ class MSH : public HL7Segment {
    * Message Type
    */
 
-  MSG* getMSH_9(size_t index = 0) {
-    return (MSG*)this->getObjectSafe(index, MSH_9);
+  MSG *getMSH_9(size_t index = 0) {
+    return (MSG *)this->getObjectSafe(index, MSH_9);
   }
 
-  MSG* getMessageType(size_t index = 0) {
-    return (MSG*)this->getObjectSafe(index, MSH_9);
+  MSG *getMessageType(size_t index = 0) {
+    return (MSG *)this->getObjectSafe(index, MSH_9);
   }
 
   bool isMSH_9(size_t index = 0) {
@@ -353,12 +352,12 @@ class MSH : public HL7Segment {
    * Message Control ID
    */
 
-  ST* getMSH_10(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, MSH_10);
+  ST *getMSH_10(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, MSH_10);
   }
 
-  ST* getMessageControlID(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, MSH_10);
+  ST *getMessageControlID(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, MSH_10);
   }
 
   bool isMSH_10(size_t index = 0) {
@@ -381,12 +380,12 @@ class MSH : public HL7Segment {
    * Processing ID
    */
 
-  PT* getMSH_11(size_t index = 0) {
-    return (PT*)this->getObjectSafe(index, MSH_11);
+  PT *getMSH_11(size_t index = 0) {
+    return (PT *)this->getObjectSafe(index, MSH_11);
   }
 
-  PT* getProcessingID(size_t index = 0) {
-    return (PT*)this->getObjectSafe(index, MSH_11);
+  PT *getProcessingID(size_t index = 0) {
+    return (PT *)this->getObjectSafe(index, MSH_11);
   }
 
   bool isMSH_11(size_t index = 0) {
@@ -409,12 +408,12 @@ class MSH : public HL7Segment {
    * Version ID
    */
 
-  VID* getMSH_12(size_t index = 0) {
-    return (VID*)this->getObjectSafe(index, MSH_12);
+  VID *getMSH_12(size_t index = 0) {
+    return (VID *)this->getObjectSafe(index, MSH_12);
   }
 
-  VID* getVersionID(size_t index = 0) {
-    return (VID*)this->getObjectSafe(index, MSH_12);
+  VID *getVersionID(size_t index = 0) {
+    return (VID *)this->getObjectSafe(index, MSH_12);
   }
 
   bool isMSH_12(size_t index = 0) {
@@ -437,12 +436,12 @@ class MSH : public HL7Segment {
    * Sequence Number
    */
 
-  NM* getMSH_13(size_t index = 0) {
-    return (NM*)this->getObjectSafe(index, MSH_13);
+  NM *getMSH_13(size_t index = 0) {
+    return (NM *)this->getObjectSafe(index, MSH_13);
   }
 
-  NM* getSequenceNumber(size_t index = 0) {
-    return (NM*)this->getObjectSafe(index, MSH_13);
+  NM *getSequenceNumber(size_t index = 0) {
+    return (NM *)this->getObjectSafe(index, MSH_13);
   }
 
   bool isMSH_13(size_t index = 0) {
@@ -465,12 +464,12 @@ class MSH : public HL7Segment {
    * Continuation Pointer
    */
 
-  ST* getMSH_14(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, MSH_14);
+  ST *getMSH_14(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, MSH_14);
   }
 
-  ST* getContinuationPointer(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, MSH_14);
+  ST *getContinuationPointer(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, MSH_14);
   }
 
   bool isMSH_14(size_t index = 0) {
@@ -493,12 +492,12 @@ class MSH : public HL7Segment {
    * Accept Acknowledgment Type
    */
 
-  ID* getMSH_15(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_15);
+  ID *getMSH_15(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_15);
   }
 
-  ID* getAcceptAcknowledgmentType(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_15);
+  ID *getAcceptAcknowledgmentType(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_15);
   }
 
   bool isMSH_15(size_t index = 0) {
@@ -521,12 +520,12 @@ class MSH : public HL7Segment {
    * Application Acknowledgment Type
    */
 
-  ID* getMSH_16(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_16);
+  ID *getMSH_16(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_16);
   }
 
-  ID* getApplicationAcknowledgmentType(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_16);
+  ID *getApplicationAcknowledgmentType(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_16);
   }
 
   bool isMSH_16(size_t index = 0) {
@@ -549,12 +548,12 @@ class MSH : public HL7Segment {
    * Country Code
    */
 
-  ID* getMSH_17(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_17);
+  ID *getMSH_17(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_17);
   }
 
-  ID* getCountryCode(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_17);
+  ID *getCountryCode(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_17);
   }
 
   bool isMSH_17(size_t index = 0) {
@@ -577,12 +576,12 @@ class MSH : public HL7Segment {
    * Character Set
    */
 
-  ID* getMSH_18(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_18);
+  ID *getMSH_18(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_18);
   }
 
-  ID* getCharacterSet(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_18);
+  ID *getCharacterSet(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_18);
   }
 
   bool isMSH_18(size_t index = 0) {
@@ -605,12 +604,12 @@ class MSH : public HL7Segment {
    * Principal Language Of Message
    */
 
-  CE* getMSH_19(size_t index = 0) {
-    return (CE*)this->getObjectSafe(index, MSH_19);
+  CE *getMSH_19(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, MSH_19);
   }
 
-  CE* getPrincipalLanguageOfMessage(size_t index = 0) {
-    return (CE*)this->getObjectSafe(index, MSH_19);
+  CE *getPrincipalLanguageOfMessage(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, MSH_19);
   }
 
   bool isMSH_19(size_t index = 0) {
@@ -633,12 +632,12 @@ class MSH : public HL7Segment {
    * Alternate Character Set Handling Scheme
    */
 
-  ID* getMSH_20(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_20);
+  ID *getMSH_20(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_20);
   }
 
-  ID* getAlternateCharacterSetHandlingScheme(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_20);
+  ID *getAlternateCharacterSetHandlingScheme(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_20);
   }
 
   bool isMSH_20(size_t index = 0) {
@@ -661,12 +660,12 @@ class MSH : public HL7Segment {
    * Conformance Statement ID
    */
 
-  ID* getMSH_21(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_21);
+  ID *getMSH_21(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_21);
   }
 
-  ID* getConformanceStatementID(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, MSH_21);
+  ID *getConformanceStatementID(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, MSH_21);
   }
 
   bool isMSH_21(size_t index = 0) {

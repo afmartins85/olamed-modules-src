@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Auriga HL7 library.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef HL7MLLP_H
+#define HL7MLLP_H
 
 #include "hl7socket.h"
 #include <string>
@@ -93,3 +95,5 @@ struct HL7MLLP : private HL7Socket {
   //     void setSocket( int new_sock ){ HL7Socket::setSocket( new_sock ); }
   //#endif // TESTS
 };
+
+#endif // HL7MLLP_H

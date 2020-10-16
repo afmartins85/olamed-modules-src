@@ -30,7 +30,6 @@ private:
   HL7SocketServer *m_hl7Serv;
   HL7Socket *m_client;
   HL7MLLP *m_mllp;
-
   int m_spo2;
 };
 

@@ -54,6 +54,17 @@ void *TothMonitor::sensorListen(void *arg) {
             monitor->sendAckMessage(monitor->m_mllp);
             if (monitor->getError() == HL7BaseError::MessageOk) {
               // TODO: informar o resultado para a camada de aplicação
+              monitor->messageProcess();
+              if (monitor->getIsTemperature() == true) {
+                monitor->setTempReaded(monitor->getTemperature());
+                monitor->setTempReady(true);
+              } else if (monitor->getIsOximeter() == true) {
+                monitor->setSpO2Readed(monitor->getOximeter());
+                monitor->setSpo2Ready(true);
+              } else if (monitor->getIsBloodPressure() == true) {
+                monitor->setBloodReaded(monitor->getBloodPressure());
+                monitor->setBloodReady(true);
+              }
             }
           }
         }
@@ -64,11 +75,3 @@ void *TothMonitor::sensorListen(void *arg) {
 
   pthread_exit(NULL);
 }
-
-int TothMonitor::getSpO2() { return m_spo2; }
-
-/**
- * @brief TothMonitor::setSpO2Readed
- * @param value
- */
-void TothMonitor::setSpO2Readed(int value) { m_spo2 = value; }

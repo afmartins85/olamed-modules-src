@@ -70,6 +70,10 @@ void DApplication::exec() {
 
   while (true) {
 
+        if (sensors->isSpo2Ready()) {
+            int x = sensors->getSpO2();
+        }
+
     // Machine states for connection handle
     switch (this->m_ptr_Socket->ConStatus()) {
     case Socket::Disconnected:

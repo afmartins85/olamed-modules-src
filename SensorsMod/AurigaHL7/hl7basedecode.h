@@ -30,14 +30,39 @@ public:
   // Returns the result of parsing the message
   HL7BaseError getError();
 
+  double getTemperature() const { return m_temperature; }
+  void setTemperature(double temperature) { m_temperature = temperature; }
+
+  int getBloodPressure() const { return m_bloodPressure; }
+  void setBloodPressure(int bloodPressure) { m_bloodPressure = bloodPressure; }
+
+  bool getIsTemperature() const { return m_isTemperature; }
+  void setIsTemperature(bool isTemperature) { m_isTemperature = isTemperature; }
+
+  bool getIsBloodPressure() const { return m_isBloodPressure; }
+  void setIsBloodPressure(bool isBloodPressure) {
+    m_isBloodPressure = isBloodPressure;
+  }
+
+  int getOximeter() const { return m_oximeter; }
+  void setOximeter(int oximeter) { m_oximeter = oximeter; }
+
+  bool getIsOximeter() const { return m_isOximeter; }
+  void setIsOximeter(bool isOximeter) { m_isOximeter = isOximeter; }
+
 private:
   HL7_24::MSH *m_MSH;
   HL7_24::OBX *m_OBX;
   HL7BaseError m_eHL7BaseError;
 
-  vector<string> m_spo2ListQueue;
-  vector<string> m_tempListQueue;
-  vector<string> m_bloodPressureListQueue;
+  double m_temperature;
+  bool m_isTemperature;
+
+  int m_bloodPressure;
+  bool m_isBloodPressure;
+
+  int m_oximeter;
+  bool m_isOximeter;
 };
 
 #endif // HL7BASEDECODE_H

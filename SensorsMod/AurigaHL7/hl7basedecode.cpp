@@ -308,13 +308,16 @@ void HL7BaseDecode::messageProcess() {
 
   if (!pressBLD.compare(
           m_OBX->getObservationIdentifier()->getText()->getData())) {
-    m_bloodPressureListQueue.push_back(m_OBX->getObservationValue()->getData());
+    setIsBloodPressure(true);
+    setBloodPressure(atoi(m_OBX->getObservationValue()->getData()));
   } else if (!temperature.compare(
                  m_OBX->getObservationIdentifier()->getText()->getData())) {
-    m_tempListQueue.push_back(m_OBX->getObservationValue()->getData());
+    setIsTemperature(true);
+    setTemperature(atof(m_OBX->getObservationValue()->getData()));
   } else if (!spo2.compare(
                  m_OBX->getObservationIdentifier()->getText()->getData())) {
-    m_spo2ListQueue.push_back(m_OBX->getObservationValue()->getData());
+    setIsOximeter(true);
+    setOximeter(atoi(m_OBX->getObservationValue()->getData()));
   }
 }
 

@@ -133,6 +133,7 @@ void Socket::clientReadMessage() {
       break;
     }
   }
+  DApplication::parseMessageReceive(buffer.c_str());
 }
 
 /**

@@ -1,6 +1,5 @@
 #include "dapplication.h"
 #include "Sensor/TOTH/tothmonitor.h"
-#include "healthsensors.h"
 #include "loguru.hpp"
 #include <chrono>
 #include <iostream>
@@ -18,6 +17,8 @@ DApplication::DApplication() {
   this->m_ptr_Socket->setPort(8080);
   //  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
   this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
+  this->m_sensProto = new SensorProtocol;
+  m_sensors = new TothMonitor;
 }
 
 /**
@@ -32,6 +33,8 @@ DApplication::DApplication(int argc, char *argv[]) {
   this->m_ptr_Socket->setPort(8080);
   //  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
   this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
+  this->m_sensProto = new SensorProtocol;
+  m_sensors = new TothMonitor;
 }
 
 /**
@@ -63,16 +66,41 @@ DApplication *DApplication::getInstance(int argc, char *argv[]) {
  */
 void DApplication::exec() {
 
-  HealthSensors *sensors = new TothMonitor;
-
   LOG_SCOPE_FUNCTION(INFO);
   LOG_F(INFO, "Sensors Daemon Started!!");
 
   while (true) {
-
-        if (sensors->isSpo2Ready()) {
-            int x = sensors->getSpO2();
-        }
+    if (m_sensors->isSpo2Ready()) {
+      double spo2 = m_sensors->getSpO2();
+      this->m_sensProto->setConnected(true);
+      this->m_sensProto->DateTime();
+      this->m_sensProto->setDate(this->m_sensProto->datetime());
+      this->m_sensProto->setSpo2(spo2);
+      this->m_sensProto->prepare_json_oximetry();
+      this->m_ptr_Socket->setMessage(
+          const_cast<char *>((this->m_sensProto->json_message()).c_str()));
+      this->m_ptr_Socket->clientSendMessage();
+    } else if (m_sensors->isTempReady()) {
+      int temp = m_sensors->getTemp();
+      this->m_sensProto->setConnected(true);
+      this->m_sensProto->DateTime();
+      this->m_sensProto->setDate(this->m_sensProto->datetime());
+      this->m_sensProto->setTemp(temp);
+      this->m_sensProto->prepare_json_BodyTemperature();
+      this->m_ptr_Socket->setMessage(
+          const_cast<char *>((this->m_sensProto->json_message()).c_str()));
+      this->m_ptr_Socket->clientSendMessage();
+    } else if (m_sensors->isBlooPressReady()) {
+      int bloodPress = m_sensors->getBlooPress();
+      this->m_sensProto->setConnected(true);
+      this->m_sensProto->DateTime();
+      this->m_sensProto->setDate(this->m_sensProto->datetime());
+      this->m_sensProto->setBloodPress(bloodPress);
+      this->m_sensProto->prepare_json_BloodPressure();
+      this->m_ptr_Socket->setMessage(
+          const_cast<char *>((this->m_sensProto->json_message()).c_str()));
+      this->m_ptr_Socket->clientSendMessage();
+    }
 
     // Machine states for connection handle
     switch (this->m_ptr_Socket->ConStatus()) {
@@ -101,6 +129,40 @@ void DApplication::exec() {
       }
       break;
     }
+  }
+}
+
+/**
+ * @brief DApplication::parseMessageReceive
+ * @param message
+ */
+void DApplication::parseMessageReceive(const char *message) {
+  DApplication *app = getInstance();
+  LOG_SCOPE_FUNCTION(INFO);
+  if (app != nullptr) {
+    app->m_sensProto->string_parse_json_object(message);
+    int type = static_cast<int>(reinterpret_cast<intptr_t>(
+        app->m_sensProto->value_json_object("type")));
+    bool reply = static_cast<bool>(reinterpret_cast<intptr_t>(
+        app->m_sensProto->value_json_object("reply")));
+    switch (type) {
+    case 7:
+    case 8:
+    case 9: {
+      if (reply == true) {
+        LOG_F(INFO, "Reply %s for register type %d!!",
+              (reply ? "true" : "false"), type);
+        // TODO: sinaliza para o proximo registro
+        app->m_sensors->isNextRegister(true);
+      }
+    } break;
+    default:
+      LOG_F(WARNING, "Command (%d) not supported!!", type);
+      break;
+    }
+
+  } else {
+    LOG_F(ERROR, "App context is null!!!");
   }
 }
 

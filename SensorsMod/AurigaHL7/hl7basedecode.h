@@ -45,7 +45,7 @@ public:
   }
 
   int getOximeter() const { return m_oximeter; }
-  void setOximeter(int oximeter) { m_oximeter = oximeter; }
+  void setOximeter(double oximeter) { m_oximeter = oximeter; }
 
   bool getIsOximeter() const { return m_isOximeter; }
   void setIsOximeter(bool isOximeter) { m_isOximeter = isOximeter; }
@@ -61,7 +61,7 @@ private:
   int m_bloodPressure;
   bool m_isBloodPressure;
 
-  int m_oximeter;
+  double m_oximeter;
   bool m_isOximeter;
 };
 

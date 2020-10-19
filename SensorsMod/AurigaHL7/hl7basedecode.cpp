@@ -317,7 +317,7 @@ void HL7BaseDecode::messageProcess() {
   } else if (!spo2.compare(
                  m_OBX->getObservationIdentifier()->getText()->getData())) {
     setIsOximeter(true);
-    setOximeter(atoi(m_OBX->getObservationValue()->getData()));
+    setOximeter(atof(m_OBX->getObservationValue()->getData()));
   }
 }
 

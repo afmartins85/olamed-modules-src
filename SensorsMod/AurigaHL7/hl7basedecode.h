@@ -52,7 +52,8 @@ public:
 
 private:
   HL7_24::MSH *m_MSH;
-  HL7_24::OBX *m_OBX;
+  // HL7_24::OBX *m_OBX;
+  vector<HL7_24::OBX *> m_OBXList;
   HL7BaseError m_eHL7BaseError;
 
   double m_temperature;

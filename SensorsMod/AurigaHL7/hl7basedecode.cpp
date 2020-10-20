@@ -11,7 +11,7 @@ using namespace std;
  */
 HL7BaseDecode::HL7BaseDecode() {
   m_MSH = new HL7_24::MSH;
-  m_OBX = new HL7_24::OBX;
+  // m_OBX = new HL7_24::OBX;
 }
 
 /**
@@ -21,9 +21,9 @@ HL7BaseDecode::~HL7BaseDecode() {
   if (m_MSH != nullptr) {
     delete m_MSH;
   }
-  if (m_OBX != nullptr) {
-    delete m_OBX;
-  }
+  //  if (m_OBX != nullptr) {
+  //    delete m_OBX;
+  //  }
 }
 
 /**
@@ -145,6 +145,8 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
   size_t found = 0;
   bool isOBXFound = false;
 
+  // printf("\n\nObservationOrResult: data: %s\n\n", data.c_str());
+
   do {
     found = data.find("OBX");
     if (found != data.npos) {
@@ -171,94 +173,177 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
 
   string OBXstr;
   for (size_t i = 0; i < list.size(); i++) {
-    found = list[i].find("OBX|4|");
-    if (found != data.npos) {
-      OBXstr = list[i];
-    }
-  }
+    printf("list[%d]: %s\n", (int)i, list[i].c_str());
 
-  string dataField;
-  int delimiterCount = 1;
+    OBXstr = list[i];
 
-  for (size_t idx = 0; idx < OBXstr.length(); ++idx) {
-    if (OBXstr[idx] == '|') {
-      switch (delimiterCount) {
-      case 1:
-        m_OBX->getSetIDOBX()->setData(dataField);
-        break;
-      case 2:
-        m_OBX->getValueType()->setData(dataField);
-        break;
-      case 4: { // Scope delimiter
-        string subStr;
-        int delimiter2 = 1;
-        for (size_t i = 0; i < dataField.size(); ++i) {
-          if (dataField[i] == '^') {
-            if (delimiter2 == 1) {
-              m_OBX->getObservationIdentifier()->getIdentifier()->setData(
-                  subStr);
-              delimiter2++;
-              subStr.clear();
+    string dataField;
+    int delimiterCount = 1;
+
+    HL7_24::OBX *m_OBX = new HL7_24::OBX;
+
+    for (size_t idx = 0; idx < OBXstr.length(); ++idx) {
+      if (OBXstr[idx] == '|') {
+        switch (delimiterCount) {
+        case 1:
+          m_OBX->getSetIDOBX()->setData(dataField);
+          break;
+        case 2:
+          m_OBX->getValueType()->setData(dataField);
+          break;
+        case 4: { // Scope delimiter
+          string subStr;
+          int delimiter2 = 1;
+          for (size_t i = 0; i < dataField.size(); ++i) {
+            if (dataField[i] == '^') {
+              if (delimiter2 == 1) {
+                m_OBX->getObservationIdentifier()->getIdentifier()->setData(
+                    subStr);
+                delimiter2++;
+                subStr.clear();
+              } else {
+                m_OBX->getObservationIdentifier()->getText()->setData(subStr);
+                subStr.clear();
+              }
             } else {
-              m_OBX->getObservationIdentifier()->getText()->setData(subStr);
-              subStr.clear();
+              subStr.push_back(dataField[i]);
             }
-          } else {
-            subStr.push_back(dataField[i]);
           }
-        }
-        m_OBX->getObservationIdentifier()->getAlternateIdentifier()->setData(
-            subStr);
-      } // Scope delimiter
-      break;
-      case 5:
-        m_OBX->getObservationSubId()->setData(dataField);
+          m_OBX->getObservationIdentifier()->getAlternateIdentifier()->setData(
+              subStr);
+        } // Scope delimiter
         break;
-      case 6:
-        m_OBX->getObservationValue()->setData(dataField);
-        break;
-      case 7: { // Scope delimiter
-        string subStr;
-        int delimiter2 = 1;
-        for (size_t i = 0; i < dataField.size(); ++i) {
-          if (dataField[i] == '^') {
-            if (delimiter2 == 1) {
-              m_OBX->getUnits()->getIdentifier()->setData(subStr);
-              delimiter2++;
-              subStr.clear();
+        case 5:
+          m_OBX->getObservationSubId()->setData(dataField);
+          break;
+        case 6:
+          m_OBX->getObservationValue()->setData(dataField);
+          break;
+        case 7: { // Scope delimiter
+          string subStr;
+          int delimiter2 = 1;
+          for (size_t i = 0; i < dataField.size(); ++i) {
+            if (dataField[i] == '^') {
+              if (delimiter2 == 1) {
+                m_OBX->getUnits()->getIdentifier()->setData(subStr);
+                delimiter2++;
+                subStr.clear();
+              } else {
+                m_OBX->getUnits()->getText()->setData(subStr);
+                subStr.clear();
+              }
             } else {
-              m_OBX->getUnits()->getText()->setData(subStr);
-              subStr.clear();
+              subStr.push_back(dataField[i]);
             }
-          } else {
-            subStr.push_back(dataField[i]);
           }
-        }
-        m_OBX->getUnits()->getNameOfCodingSystem()->setData(subStr);
-      } // Scope delimiter
-      break;
-      case 8:
-        m_OBX->getReferencesRange()->setData(dataField);
+          m_OBX->getUnits()->getNameOfCodingSystem()->setData(subStr);
+        } // Scope delimiter
         break;
+        case 8:
+          m_OBX->getReferencesRange()->setData(dataField);
+          break;
+        }
+        delimiterCount++;
+        dataField.clear();
+      } else {
+        dataField.push_back(OBXstr[idx]);
       }
-      delimiterCount++;
-      dataField.clear();
-    } else {
-      dataField.push_back(OBXstr[idx]);
     }
+    printf("m_OBX: %s\n", (char *)m_OBX);
+    m_OBXList.push_back(m_OBX);
+
+    //    found = list[i].find("OBX|4|");
+    //    if (found != data.npos) {
+    //      OBXstr = list[i];
+    //    }
   }
+
+  //  string dataField;
+  //  int delimiterCount = 1;
+
+  //  for (size_t idx = 0; idx < OBXstr.length(); ++idx) {
+  //    if (OBXstr[idx] == '|') {
+  //      switch (delimiterCount) {
+  //      case 1:
+  //        m_OBX->getSetIDOBX()->setData(dataField);
+  //        break;
+  //      case 2:
+  //        m_OBX->getValueType()->setData(dataField);
+  //        break;
+  //      case 4: { // Scope delimiter
+  //        string subStr;
+  //        int delimiter2 = 1;
+  //        for (size_t i = 0; i < dataField.size(); ++i) {
+  //          if (dataField[i] == '^') {
+  //            if (delimiter2 == 1) {
+  //              m_OBX->getObservationIdentifier()->getIdentifier()->setData(
+  //                  subStr);
+  //              delimiter2++;
+  //              subStr.clear();
+  //            } else {
+  //              m_OBX->getObservationIdentifier()->getText()->setData(subStr);
+  //              subStr.clear();
+  //            }
+  //          } else {
+  //            subStr.push_back(dataField[i]);
+  //          }
+  //        }
+  //        m_OBX->getObservationIdentifier()->getAlternateIdentifier()->setData(
+  //            subStr);
+  //      } // Scope delimiter
+  //      break;
+  //      case 5:
+  //        m_OBX->getObservationSubId()->setData(dataField);
+  //        break;
+  //      case 6:
+  //        m_OBX->getObservationValue()->setData(dataField);
+  //        break;
+  //      case 7: { // Scope delimiter
+  //        string subStr;
+  //        int delimiter2 = 1;
+  //        for (size_t i = 0; i < dataField.size(); ++i) {
+  //          if (dataField[i] == '^') {
+  //            if (delimiter2 == 1) {
+  //              m_OBX->getUnits()->getIdentifier()->setData(subStr);
+  //              delimiter2++;
+  //              subStr.clear();
+  //            } else {
+  //              m_OBX->getUnits()->getText()->setData(subStr);
+  //              subStr.clear();
+  //            }
+  //          } else {
+  //            subStr.push_back(dataField[i]);
+  //          }
+  //        }
+  //        m_OBX->getUnits()->getNameOfCodingSystem()->setData(subStr);
+  //      } // Scope delimiter
+  //      break;
+  //      case 8:
+  //        m_OBX->getReferencesRange()->setData(dataField);
+  //        break;
+  //      }
+  //      delimiterCount++;
+  //      dataField.clear();
+  //    } else {
+  //      dataField.push_back(OBXstr[idx]);
+  //    }
+  //  }
 
   LOG_SCOPE_F(9, "OBX Segment");
-  LOG_F(9, "Set ID - OBX: %s", m_OBX->getSetIDOBX()->getData());
-  LOG_F(9, "Value Type: %s", m_OBX->getValueType()->getData());
-  LOG_F(9, "%s", m_OBX->getObservationIdentifier()->getIdentifier()->getData());
-  LOG_F(9, "%s", m_OBX->getObservationIdentifier()->getText()->getData());
-  LOG_F(9, "Observation Sub-ID: %s", m_OBX->getObservationSubId()->getData());
-  LOG_F(9, "Observation Value: %s", m_OBX->getObservationValue()->getData());
-  LOG_F(9, "%s", m_OBX->getUnits()->getIdentifier()->getData());
-  LOG_F(9, "%s", m_OBX->getUnits()->getText()->getData());
-  LOG_F(9, "%s", m_OBX->getUnits()->getNameOfCodingSystem()->getData());
-  LOG_F(9, "References Range: %s", m_OBX->getReferencesRange()->getData());
+  for (size_t i = 0; i < m_OBXList.size(); i++) {
+    HL7_24::OBX *m_OBX = m_OBXList[i];
+    LOG_F(9, "Set ID - OBX: %s", m_OBX->getSetIDOBX()->getData());
+    LOG_F(9, "Value Type: %s", m_OBX->getValueType()->getData());
+    LOG_F(9, "%s",
+          m_OBX->getObservationIdentifier()->getIdentifier()->getData());
+    LOG_F(9, "%s", m_OBX->getObservationIdentifier()->getText()->getData());
+    LOG_F(9, "Observation Sub-ID: %s", m_OBX->getObservationSubId()->getData());
+    LOG_F(9, "Observation Value: %s ", m_OBX->getObservationValue()->getData());
+    LOG_F(9, "%s", m_OBX->getUnits()->getIdentifier()->getData());
+    LOG_F(9, "%s", m_OBX->getUnits()->getText()->getData());
+    LOG_F(9, "%s", m_OBX->getUnits()->getNameOfCodingSystem()->getData());
+    LOG_F(9, "References Range: %s", m_OBX->getReferencesRange()->getData());
+  }
 
   m_eHL7BaseError = HL7BaseError::MessageOk;
 }
@@ -306,19 +391,19 @@ void HL7BaseDecode::messageProcess() {
   string temperature(MDC_TEMPERATURE);
   string spo2(MDC_SPO2);
 
-  if (!pressBLD.compare(
-          m_OBX->getObservationIdentifier()->getText()->getData())) {
-    setIsBloodPressure(true);
-    setBloodPressure(atoi(m_OBX->getObservationValue()->getData()));
-  } else if (!temperature.compare(
-                 m_OBX->getObservationIdentifier()->getText()->getData())) {
-    setIsTemperature(true);
-    setTemperature(atof(m_OBX->getObservationValue()->getData()));
-  } else if (!spo2.compare(
-                 m_OBX->getObservationIdentifier()->getText()->getData())) {
-    setIsOximeter(true);
-    setOximeter(atof(m_OBX->getObservationValue()->getData()));
-  }
+  //  if (!pressBLD.compare(
+  //          m_OBX->getObservationIdentifier()->getText()->getData())) {
+  //    setIsBloodPressure(true);
+  //    setBloodPressure(atoi(m_OBX->getObservationValue()->getData()));
+  //  } else if (!temperature.compare(
+  //                 m_OBX->getObservationIdentifier()->getText()->getData())) {
+  //    setIsTemperature(true);
+  //    setTemperature(atof(m_OBX->getObservationValue()->getData()));
+  //  } else if (!spo2.compare(
+  //                 m_OBX->getObservationIdentifier()->getText()->getData())) {
+  //    setIsOximeter(true);
+  //    setOximeter(atof(m_OBX->getObservationValue()->getData()));
+  //  }
 }
 
 /**

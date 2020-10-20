@@ -44,7 +44,7 @@ void *TothMonitor::sensorListen(void *arg) {
     } else if (machState == MonitorCommStatus::ReceiveMessage) {
       int ret = monitor->m_mllp->read_msg_mllp(data);
       if ((ret <= 0) && (data.empty())) {
-        LOG_F(WARNING, "Close TOTH Monitor connection.\n");
+        // LOG_F(WARNING, "Close TOTH Monitor connection.\n");
         close(monitor->m_client->getSocket());
       } else {
         // Identify message received
@@ -55,12 +55,16 @@ void *TothMonitor::sensorListen(void *arg) {
           if (monitor->getError() == HL7BaseError::MessageOk) {
             // TODO: informar o resultado para a camada de aplicação
             monitor->messageProcess();
+            printf("\n*** Antes: pthread_mutex_lock(&m_tothCommMutex ***\n);");
             pthread_mutex_lock(&m_tothCommMutex);
+            printf("\n*** Depois: pthread_mutex_lock(&m_tothCommMutex ***\n);");
             if (monitor->getIsTemperature() == true) {
               monitor->setTempReaded(monitor->getTemperature());
               monitor->setTempReady(true);
             } else if (monitor->getIsOximeter() == true) {
+              printf("\n**** monitor->getIsOximeter() == true ****\n");
               monitor->setSpO2Readed(monitor->getOximeter());
+              printf("\n**** monitor->setSpo2Ready(true) ****\n");
               monitor->setSpo2Ready(true);
             } else if (monitor->getIsBloodPressure() == true) {
               monitor->setBloodReaded(monitor->getBloodPressure());
@@ -74,11 +78,11 @@ void *TothMonitor::sensorListen(void *arg) {
     } else if (machState == MonitorCommStatus::WaitingConfirmation) {
       if (monitor->getNextRegister() == true) {
         // Send Acknowledge
-        monitor->sendAckMessage(monitor->m_mllp);
+        // monitor->sendAckMessage(monitor->m_mllp);
         if (monitor->getError() == HL7BaseError::MessageOk) {
           machState = MonitorCommStatus::ReceiveMessage;
         } else {
-          LOG_F(WARNING, "Force close TOTH Monitor connection.\n");
+          // LOG_F(WARNING, "Force close TOTH Monitor connection.\n");
           close(monitor->m_client->getSocket());
           machState = MonitorCommStatus::Disconnected;
         }

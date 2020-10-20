@@ -54,6 +54,7 @@ public:
   bool isSpo2Ready() override {
     bool ready = 0;
     pthread_mutex_lock(&m_tothCommMutex);
+    printf("\n**** m_spo2Ready: %d ****\n", m_spo2Ready);
     ready = m_spo2Ready;
     pthread_mutex_unlock(&m_tothCommMutex);
     return ready;

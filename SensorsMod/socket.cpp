@@ -41,8 +41,8 @@ bool Socket::clientConnect() {
     return false;
   }
 
-  std::string handshake("PrinterMod");
-  send(m_sock, handshake.c_str(), handshake.size(), 0);
+  // std::string handshake("PrinterMod");
+  // send(m_sock, handshake.c_str(), handshake.size(), 0);
   return true;
 }
 
@@ -101,8 +101,12 @@ Socket::CConnectionState Socket::clientSelect() {
  */
 int Socket::clientSendMessage(void) {
   if (this->ConStatus() == Connected) {
+    printf("\n ****m_message: %s ****\n", m_message.c_str());
+    printf("\n **** Antes do: send m_sock ****\n");
+    printf("\n *** m_socket: %d ****\n", m_sock);
     send(m_sock, const_cast<char *>(m_message.c_str()),
          strlen(const_cast<char *>(m_message.c_str())), 0);
+    printf("\n **** Depois do: send m_sock ****\n");
   } else {
     return -1;
   }

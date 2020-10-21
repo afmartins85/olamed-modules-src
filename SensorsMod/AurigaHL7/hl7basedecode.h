@@ -51,15 +51,25 @@ public:
   bool getIsOximeter() const { return m_isOximeter; }
   void setIsOximeter(bool isOximeter) { m_isOximeter = isOximeter; }
 
-  int getPressBloodSys() const { return m_pressBloodSys; }
-  void setPressBloodSys(int pressBloodSys) { m_pressBloodSys = pressBloodSys; }
+  int getPressBldSys() const { return m_pressBloodSys; }
+  void setPressBldSys(int pressBloodSys) {
+    LOG_F(INFO, "pressBloodSys: %d", pressBloodSys);
+    m_pressBloodSys = pressBloodSys;
+    LOG_F(INFO, "m_pressBloodSys: %d", m_pressBloodSys);
+  }
 
-  int getPressBloodDia() const { return m_pressBloodDia; }
-  void setPressBloodDia(int pressBloodDia) { m_pressBloodDia = pressBloodDia; }
+  int getPressBldDia() const { return m_pressBloodDia; }
+  void setPressBldDia(int pressBloodDia) {
+    LOG_F(INFO, "pressBloodSys: %d", pressBloodDia);
+    m_pressBloodDia = pressBloodDia;
+    LOG_F(INFO, "m_pressBloodDia: %d", m_pressBloodDia);
+  }
 
-  int getPressBloodMean() const { return m_pressBloodMean; }
-  void setPressBloodMean(int pressBloodMean) {
+  int getPressBldMean() const { return m_pressBloodMean; }
+  void setPressBldMean(int pressBloodMean) {
+    LOG_F(INFO, "pressBloodMean: %d", pressBloodMean);
     m_pressBloodMean = pressBloodMean;
+    LOG_F(INFO, "m_pressBloodMean: %d", m_pressBloodMean);
   }
 
 private:

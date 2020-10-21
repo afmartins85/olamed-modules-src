@@ -317,14 +317,29 @@ void HL7BaseDecode::messageProcess() {
 
     if (!pressBloodSYS.compare(
             pOBX->getObservationIdentifier()->getText()->getData())) {
-      setPressBloodSys(atoi(pOBX->getObservationValue()->getData()));
+      printf("pressBloodSYS.compare: %d\n",
+             pressBloodSYS.compare(
+                 pOBX->getObservationIdentifier()->getText()->getData()));
+      printf("pressBloodSYS: %s\n",
+             pOBX->getObservationIdentifier()->getText()->getData());
+      setPressBldSys(atoi(pOBX->getObservationValue()->getData()));
     } else if (!pressBloodDIA.compare(
                    pOBX->getObservationIdentifier()->getText()->getData())) {
-      setPressBloodDia(atoi(pOBX->getObservationValue()->getData()));
+      printf("pressBloodDIA.compare: %d\n",
+             pressBloodDIA.compare(
+                 pOBX->getObservationIdentifier()->getText()->getData()));
+      printf("pressBloodDIA: %s\n",
+             pOBX->getObservationIdentifier()->getText()->getData());
+      setPressBldDia(atoi(pOBX->getObservationValue()->getData()));
     } else if (!pressBloodMEAN.compare(
                    pOBX->getObservationIdentifier()->getText()->getData())) {
+      printf("pressBloodMEAN.compare: %d\n",
+             pressBloodMEAN.compare(
+                 pOBX->getObservationIdentifier()->getText()->getData()));
+      printf("pressBloodMEAN: %s\n",
+             pOBX->getObservationIdentifier()->getText()->getData());
       setIsBloodPressure(true);
-      setPressBloodMean(atoi(pOBX->getObservationValue()->getData()));
+      setPressBldMean(atoi(pOBX->getObservationValue()->getData()));
     } else if (!temperature.compare(
                    pOBX->getObservationIdentifier()->getText()->getData())) {
       setIsTemperature(true);

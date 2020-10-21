@@ -101,6 +101,7 @@ void DApplication::exec() {
       this->m_ptr_Socket->setMessage(
           const_cast<char *>((this->m_sensProto->json_message()).c_str()));
       this->m_ptr_Socket->clientSendMessage();
+      printf("MESAAGE SENT TO SERVER !!!!!!!!");
     }
 
     // Machine states for connection handle

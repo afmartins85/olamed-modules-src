@@ -54,8 +54,20 @@ public:
   inline double temp() const { return m_temp; }
   inline void setTemp(double temp) { m_temp = temp; }
 
-  inline int bloodPress() const { return m_bloodPress; }
-  inline void setBloodPress(int bloodPress) { m_bloodPress = bloodPress; }
+  inline int pressBloodSys() const { return m_pressBloodSys; }
+  inline void setPressBloodSys(int pressBloodSys) {
+    m_pressBloodSys = pressBloodSys;
+  }
+
+  inline int pressBloodDia() const { return m_pressBloodDia; }
+  inline void setPressBloodDia(int pressBloodDia) {
+    m_pressBloodDia = pressBloodDia;
+  }
+
+  inline int pressBloodMean() const { return m_pressBloodMean; }
+  inline void setPressBloodMean(int pressBloodMean) {
+    m_pressBloodMean = pressBloodMean;
+  }
 
 private:
   uint64_t m_type;
@@ -66,7 +78,9 @@ private:
   string m_addr;
   double m_spo2;
   double m_temp;
-  int m_bloodPress;
+  int m_pressBloodSys;
+  int m_pressBloodDia;
+  int m_pressBloodMean;
 
   string m_json_message;
 

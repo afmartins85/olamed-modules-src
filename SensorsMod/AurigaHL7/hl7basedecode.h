@@ -9,7 +9,9 @@
 using namespace std;
 
 #define MDC_TEMPERATURE "MDC_TEMP_BODY"
-#define MDC_BLOOD_PRESS "MDC_PRESS_BLD_NONINV_SYS"
+#define MDC_BLOOD_PRESS_SYS "MDC_PRESS_BLD_NONINV_SYS"
+#define MDC_BLOOD_PRESS_DIA "MDC_PRESS_BLD_NONINV_DIA"
+#define MDC_BLOOD_PRESS_MEAN "MDC_PRESS_BLD_NONINV_MEAN"
 #define MDC_SPO2 "MDC_PULS_OXIM_SAT_O2"
 
 enum class HL7BaseError { SendindAckError, BadFormat, MessageOk };
@@ -27,21 +29,20 @@ public:
   void sendAckMessage(HL7MLLP *mllp);
   //! Process the register received
   void messageProcess();
-  // Returns the result of parsing the message
+  //! Returns the result of parsing the message
   HL7BaseError getError();
+  //! Remove all OBX registers
+  void clearOBXList();
 
   double getTemperature() const { return m_temperature; }
   void setTemperature(double temperature) { m_temperature = temperature; }
 
-  int getBloodPressure() const { return m_bloodPressure; }
-  void setBloodPressure(int bloodPressure) { m_bloodPressure = bloodPressure; }
-
   bool getIsTemperature() const { return m_isTemperature; }
   void setIsTemperature(bool isTemperature) { m_isTemperature = isTemperature; }
 
-  bool getIsBloodPressure() const { return m_isBloodPressure; }
+  bool getIsBloodPressure() const { return m_isPressBlood; }
   void setIsBloodPressure(bool isBloodPressure) {
-    m_isBloodPressure = isBloodPressure;
+    m_isPressBlood = isBloodPressure;
   }
 
   int getOximeter() const { return m_oximeter; }
@@ -49,6 +50,17 @@ public:
 
   bool getIsOximeter() const { return m_isOximeter; }
   void setIsOximeter(bool isOximeter) { m_isOximeter = isOximeter; }
+
+  int getPressBloodSys() const { return m_pressBloodSys; }
+  void setPressBloodSys(int pressBloodSys) { m_pressBloodSys = pressBloodSys; }
+
+  int getPressBloodDia() const { return m_pressBloodDia; }
+  void setPressBloodDia(int pressBloodDia) { m_pressBloodDia = pressBloodDia; }
+
+  int getPressBloodMean() const { return m_pressBloodMean; }
+  void setPressBloodMean(int pressBloodMean) {
+    m_pressBloodMean = pressBloodMean;
+  }
 
 private:
   HL7_24::MSH *m_MSH;
@@ -59,8 +71,10 @@ private:
   double m_temperature;
   bool m_isTemperature;
 
-  int m_bloodPressure;
-  bool m_isBloodPressure;
+  int m_pressBloodSys;
+  int m_pressBloodDia;
+  int m_pressBloodMean;
+  bool m_isPressBlood;
 
   double m_oximeter;
   bool m_isOximeter;

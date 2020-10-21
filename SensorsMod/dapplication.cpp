@@ -91,11 +91,12 @@ void DApplication::exec() {
           const_cast<char *>((this->m_sensProto->json_message()).c_str()));
       this->m_ptr_Socket->clientSendMessage();
     } else if (m_sensors->isBlooPressReady()) {
-      int bloodPress = m_sensors->getBlooPress();
       this->m_sensProto->setConnected(true);
       this->m_sensProto->DateTime();
       this->m_sensProto->setDate(this->m_sensProto->datetime());
-      this->m_sensProto->setBloodPress(bloodPress);
+      this->m_sensProto->setPressBloodSys(m_sensors->getPressBloodSys());
+      this->m_sensProto->setPressBloodDia(m_sensors->getPressBloodDia());
+      this->m_sensProto->setPressBloodMean(m_sensors->getPressBloodMean());
       this->m_sensProto->prepare_json_BloodPressure();
       this->m_ptr_Socket->setMessage(
           const_cast<char *>((this->m_sensProto->json_message()).c_str()));

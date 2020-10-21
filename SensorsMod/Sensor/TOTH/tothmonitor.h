@@ -54,16 +54,33 @@ public:
   bool isSpo2Ready() override {
     bool ready = 0;
     pthread_mutex_lock(&m_tothCommMutex);
-    printf("\n**** m_spo2Ready: %d ****\n", m_spo2Ready);
     ready = m_spo2Ready;
     pthread_mutex_unlock(&m_tothCommMutex);
     return ready;
   }
 
-  int getBlooPress() override {
+  int getPressBloodSys() override {
     int bloodPress = 0;
     pthread_mutex_lock(&m_tothCommMutex);
-    bloodPress = m_bloodPress;
+    bloodPress = m_pressBloodSys;
+    setBloodReady(false);
+    pthread_mutex_unlock(&m_tothCommMutex);
+    return bloodPress;
+  }
+
+  int getPressBloodDia() override {
+    int bloodPress = 0;
+    pthread_mutex_lock(&m_tothCommMutex);
+    bloodPress = m_pressBloodDia;
+    setBloodReady(false);
+    pthread_mutex_unlock(&m_tothCommMutex);
+    return bloodPress;
+  }
+
+  int getPressBloodMean() override {
+    int bloodPress = 0;
+    pthread_mutex_lock(&m_tothCommMutex);
+    bloodPress = m_pressBloodMean;
     setBloodReady(false);
     pthread_mutex_unlock(&m_tothCommMutex);
     return bloodPress;
@@ -98,9 +115,18 @@ public:
   inline void setSpO2Readed(double value) { m_spo2 = value; }
   inline void setSpo2Ready(bool spo2Ready) { m_spo2Ready = spo2Ready; }
 
-  inline void setBloodReaded(int value) { m_bloodPress = value; }
   inline void setBloodReady(bool bloodPressReady) {
     m_bloodPressReady = bloodPressReady;
+  }
+
+  inline void setPressBloodSys(int pressBloodSys) {
+    m_pressBloodSys = pressBloodSys;
+  }
+  inline void setPressBloodDia(int pressBloodDia) {
+    m_pressBloodDia = pressBloodDia;
+  }
+  inline void setPressBloodMean(int pressBloodMean) {
+    m_pressBloodMean = pressBloodMean;
   }
 
 private:
@@ -112,7 +138,9 @@ private:
   bool m_tempReady;
   double m_spo2;
   bool m_spo2Ready;
-  int m_bloodPress;
+  int m_pressBloodSys;
+  int m_pressBloodDia;
+  int m_pressBloodMean;
   bool m_bloodPressReady;
   bool m_bNextRegister;
   static pthread_mutex_t m_tothCommMutex;

@@ -218,7 +218,9 @@ void SensorProtocol::prepare_json_BloodPressure() {
     create_json_object(jobj_actual, "serial", (void *)serial().c_str(),
                        Type::String);
     create_json_object(jobj_actual, "connected", (void *)(true), Type::Boolean);
-    create_json_object(jobj_actual, "bloodPress", &m_bloodPress, Type::Double);
+    create_json_object(jobj_actual, "systolic", &m_pressBloodSys, Type::Int);
+    create_json_object(jobj_actual, "diastolic", &m_pressBloodDia, Type::Int);
+    create_json_object(jobj_actual, "mean", &m_pressBloodMean, Type::Int);
     create_json_object(jobj_actual, "date", (void *)date().c_str(),
                        Type::String);
   } else {

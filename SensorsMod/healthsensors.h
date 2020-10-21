@@ -9,7 +9,9 @@ public:
   virtual bool isTempReady() = 0;
   virtual double getSpO2() = 0;
   virtual bool isSpo2Ready() = 0;
-  virtual int getBlooPress() = 0;
+  virtual int getPressBloodSys() = 0;
+  virtual int getPressBloodDia() = 0;
+  virtual int getPressBloodMean() = 0;
   virtual bool isBlooPressReady() = 0;
   virtual void isNextRegister(bool next) = 0;
 };

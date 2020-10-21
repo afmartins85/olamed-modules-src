@@ -8,7 +8,8 @@ pthread_mutex_t TothMonitor::m_tothCommMutex(PTHREAD_MUTEX_INITIALIZER);
  */
 TothMonitor::TothMonitor()
     : m_temp(0), m_tempReady(false), m_spo2(0), m_spo2Ready(false),
-      m_bloodPress(0), m_bloodPressReady(false) {
+      m_pressBloodSys(0), m_pressBloodDia(0), m_pressBloodMean(0),
+      m_bloodPressReady(false) {
 
   // create socket server
   this->m_hl7Serv = new HL7SocketServer(50000);
@@ -55,19 +56,17 @@ void *TothMonitor::sensorListen(void *arg) {
           if (monitor->getError() == HL7BaseError::MessageOk) {
             // TODO: informar o resultado para a camada de aplicação
             monitor->messageProcess();
-            printf("\n*** Antes: pthread_mutex_lock(&m_tothCommMutex ***\n);");
             pthread_mutex_lock(&m_tothCommMutex);
-            printf("\n*** Depois: pthread_mutex_lock(&m_tothCommMutex ***\n);");
             if (monitor->getIsTemperature() == true) {
               monitor->setTempReaded(monitor->getTemperature());
               monitor->setTempReady(true);
             } else if (monitor->getIsOximeter() == true) {
-              printf("\n**** monitor->getIsOximeter() == true ****\n");
               monitor->setSpO2Readed(monitor->getOximeter());
-              printf("\n**** monitor->setSpo2Ready(true) ****\n");
               monitor->setSpo2Ready(true);
             } else if (monitor->getIsBloodPressure() == true) {
-              monitor->setBloodReaded(monitor->getBloodPressure());
+              monitor->setPressBloodSys(monitor->getPressBloodSys());
+              monitor->setPressBloodDia(monitor->getPressBloodDia());
+              monitor->setPressBloodMean(monitor->getPressBloodMean());
               monitor->setBloodReady(true);
             }
             pthread_mutex_unlock(&m_tothCommMutex);

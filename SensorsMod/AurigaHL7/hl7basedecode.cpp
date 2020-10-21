@@ -145,8 +145,6 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
   size_t found = 0;
   bool isOBXFound = false;
 
-  // printf("\n\nObservationOrResult: data: %s\n\n", data.c_str());
-
   do {
     found = data.find("OBX");
     if (found != data.npos) {
@@ -173,8 +171,6 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
 
   string OBXstr;
   for (size_t i = 0; i < list.size(); i++) {
-    printf("list[%d]: %s\n", (int)i, list[i].c_str());
-
     OBXstr = list[i];
 
     string dataField;
@@ -249,85 +245,8 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
         dataField.push_back(OBXstr[idx]);
       }
     }
-    printf("m_OBX: %s\n", (char *)m_OBX);
     m_OBXList.push_back(m_OBX);
-
-    //    found = list[i].find("OBX|4|");
-    //    if (found != data.npos) {
-    //      OBXstr = list[i];
-    //    }
   }
-
-  //  string dataField;
-  //  int delimiterCount = 1;
-
-  //  for (size_t idx = 0; idx < OBXstr.length(); ++idx) {
-  //    if (OBXstr[idx] == '|') {
-  //      switch (delimiterCount) {
-  //      case 1:
-  //        m_OBX->getSetIDOBX()->setData(dataField);
-  //        break;
-  //      case 2:
-  //        m_OBX->getValueType()->setData(dataField);
-  //        break;
-  //      case 4: { // Scope delimiter
-  //        string subStr;
-  //        int delimiter2 = 1;
-  //        for (size_t i = 0; i < dataField.size(); ++i) {
-  //          if (dataField[i] == '^') {
-  //            if (delimiter2 == 1) {
-  //              m_OBX->getObservationIdentifier()->getIdentifier()->setData(
-  //                  subStr);
-  //              delimiter2++;
-  //              subStr.clear();
-  //            } else {
-  //              m_OBX->getObservationIdentifier()->getText()->setData(subStr);
-  //              subStr.clear();
-  //            }
-  //          } else {
-  //            subStr.push_back(dataField[i]);
-  //          }
-  //        }
-  //        m_OBX->getObservationIdentifier()->getAlternateIdentifier()->setData(
-  //            subStr);
-  //      } // Scope delimiter
-  //      break;
-  //      case 5:
-  //        m_OBX->getObservationSubId()->setData(dataField);
-  //        break;
-  //      case 6:
-  //        m_OBX->getObservationValue()->setData(dataField);
-  //        break;
-  //      case 7: { // Scope delimiter
-  //        string subStr;
-  //        int delimiter2 = 1;
-  //        for (size_t i = 0; i < dataField.size(); ++i) {
-  //          if (dataField[i] == '^') {
-  //            if (delimiter2 == 1) {
-  //              m_OBX->getUnits()->getIdentifier()->setData(subStr);
-  //              delimiter2++;
-  //              subStr.clear();
-  //            } else {
-  //              m_OBX->getUnits()->getText()->setData(subStr);
-  //              subStr.clear();
-  //            }
-  //          } else {
-  //            subStr.push_back(dataField[i]);
-  //          }
-  //        }
-  //        m_OBX->getUnits()->getNameOfCodingSystem()->setData(subStr);
-  //      } // Scope delimiter
-  //      break;
-  //      case 8:
-  //        m_OBX->getReferencesRange()->setData(dataField);
-  //        break;
-  //      }
-  //      delimiterCount++;
-  //      dataField.clear();
-  //    } else {
-  //      dataField.push_back(OBXstr[idx]);
-  //    }
-  //  }
 
   LOG_SCOPE_F(9, "OBX Segment");
   for (size_t i = 0; i < m_OBXList.size(); i++) {
@@ -387,23 +306,37 @@ void HL7BaseDecode::sendAckMessage(HL7MLLP *mllp) {
  * @brief HL7BaseDecode::messageProcess
  */
 void HL7BaseDecode::messageProcess() {
-  string pressBLD(MDC_BLOOD_PRESS);
+  string pressBloodSYS(MDC_BLOOD_PRESS_SYS);
+  string pressBloodDIA(MDC_BLOOD_PRESS_DIA);
+  string pressBloodMEAN(MDC_BLOOD_PRESS_MEAN);
   string temperature(MDC_TEMPERATURE);
   string spo2(MDC_SPO2);
 
-  //  if (!pressBLD.compare(
-  //          m_OBX->getObservationIdentifier()->getText()->getData())) {
-  //    setIsBloodPressure(true);
-  //    setBloodPressure(atoi(m_OBX->getObservationValue()->getData()));
-  //  } else if (!temperature.compare(
-  //                 m_OBX->getObservationIdentifier()->getText()->getData())) {
-  //    setIsTemperature(true);
-  //    setTemperature(atof(m_OBX->getObservationValue()->getData()));
-  //  } else if (!spo2.compare(
-  //                 m_OBX->getObservationIdentifier()->getText()->getData())) {
-  //    setIsOximeter(true);
-  //    setOximeter(atof(m_OBX->getObservationValue()->getData()));
-  //  }
+  for (size_t i = 0; i < m_OBXList.size(); ++i) {
+    HL7_24::OBX *pOBX = m_OBXList[i];
+
+    if (!pressBloodSYS.compare(
+            pOBX->getObservationIdentifier()->getText()->getData())) {
+      setPressBloodSys(atoi(pOBX->getObservationValue()->getData()));
+    } else if (!pressBloodDIA.compare(
+                   pOBX->getObservationIdentifier()->getText()->getData())) {
+      setPressBloodDia(atoi(pOBX->getObservationValue()->getData()));
+    } else if (!pressBloodMEAN.compare(
+                   pOBX->getObservationIdentifier()->getText()->getData())) {
+      setIsBloodPressure(true);
+      setPressBloodMean(atoi(pOBX->getObservationValue()->getData()));
+    } else if (!temperature.compare(
+                   pOBX->getObservationIdentifier()->getText()->getData())) {
+      setIsTemperature(true);
+      setTemperature(atof(pOBX->getObservationValue()->getData()));
+    } else if (!spo2.compare(
+                   pOBX->getObservationIdentifier()->getText()->getData())) {
+      setIsOximeter(true);
+      setOximeter(atof(pOBX->getObservationValue()->getData()) / 100);
+    }
+  }
+
+  this->clearOBXList();
 }
 
 /**
@@ -411,3 +344,14 @@ void HL7BaseDecode::messageProcess() {
  * @return
  */
 HL7BaseError HL7BaseDecode::getError() { return m_eHL7BaseError; }
+
+/**
+ * @brief HL7BaseDecode::clearOBXList
+ */
+void HL7BaseDecode::clearOBXList() {
+  for (size_t i = 0; i < m_OBXList.size(); ++i) {
+    HL7_24::OBX *pOBX = m_OBXList[i];
+    delete pOBX;
+  }
+  m_OBXList.clear();
+}

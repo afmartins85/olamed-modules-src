@@ -52,24 +52,14 @@ public:
   void setIsOximeter(bool isOximeter) { m_isOximeter = isOximeter; }
 
   int getPressBldSys() const { return m_pressBloodSys; }
-  void setPressBldSys(int pressBloodSys) {
-    LOG_F(INFO, "pressBloodSys: %d", pressBloodSys);
-    m_pressBloodSys = pressBloodSys;
-    LOG_F(INFO, "m_pressBloodSys: %d", m_pressBloodSys);
-  }
+  void setPressBldSys(int pressBloodSys) { m_pressBloodSys = pressBloodSys; }
 
   int getPressBldDia() const { return m_pressBloodDia; }
-  void setPressBldDia(int pressBloodDia) {
-    LOG_F(INFO, "pressBloodSys: %d", pressBloodDia);
-    m_pressBloodDia = pressBloodDia;
-    LOG_F(INFO, "m_pressBloodDia: %d", m_pressBloodDia);
-  }
+  void setPressBldDia(int pressBloodDia) { m_pressBloodDia = pressBloodDia; }
 
   int getPressBldMean() const { return m_pressBloodMean; }
   void setPressBldMean(int pressBloodMean) {
-    LOG_F(INFO, "pressBloodMean: %d", pressBloodMean);
     m_pressBloodMean = pressBloodMean;
-    LOG_F(INFO, "m_pressBloodMean: %d", m_pressBloodMean);
   }
 
 private:

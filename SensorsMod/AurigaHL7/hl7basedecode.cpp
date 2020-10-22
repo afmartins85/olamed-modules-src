@@ -173,6 +173,8 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
   for (size_t i = 0; i < list.size(); i++) {
     OBXstr = list[i];
 
+    LOG_F(9, "%s", OBXstr.c_str());
+
     string dataField;
     int delimiterCount = 1;
 
@@ -238,6 +240,26 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
         case 8:
           m_OBX->getReferencesRange()->setData(dataField);
           break;
+          //        case 19: { // Scope delimiter
+          //          string subStr;
+          //          int delimiter2 = 1;
+          //          for (size_t i = 0; i < dataField.size(); ++i) {
+          //            if (dataField[i] == '^') {
+          //              if (delimiter2 == 1) {
+          //                m_OBX->getUnits()->getIdentifier()->setData(subStr);
+          //                delimiter2++;
+          //                subStr.clear();
+          //              } else {
+          //                m_OBX->getUnits()->getText()->setData(subStr);
+          //                subStr.clear();
+          //              }
+          //            } else {
+          //              subStr.push_back(dataField[i]);
+          //            }
+          //          }
+          //          m_OBX->getUnits()->getNameOfCodingSystem()->setData(subStr);
+          //        } // Scope delimiter
+          //        break;
         }
         delimiterCount++;
         dataField.clear();
@@ -317,27 +339,12 @@ void HL7BaseDecode::messageProcess() {
 
     if (!pressBloodSYS.compare(
             pOBX->getObservationIdentifier()->getText()->getData())) {
-      printf("pressBloodSYS.compare: %d\n",
-             pressBloodSYS.compare(
-                 pOBX->getObservationIdentifier()->getText()->getData()));
-      printf("pressBloodSYS: %s\n",
-             pOBX->getObservationIdentifier()->getText()->getData());
       setPressBldSys(atoi(pOBX->getObservationValue()->getData()));
     } else if (!pressBloodDIA.compare(
                    pOBX->getObservationIdentifier()->getText()->getData())) {
-      printf("pressBloodDIA.compare: %d\n",
-             pressBloodDIA.compare(
-                 pOBX->getObservationIdentifier()->getText()->getData()));
-      printf("pressBloodDIA: %s\n",
-             pOBX->getObservationIdentifier()->getText()->getData());
       setPressBldDia(atoi(pOBX->getObservationValue()->getData()));
     } else if (!pressBloodMEAN.compare(
                    pOBX->getObservationIdentifier()->getText()->getData())) {
-      printf("pressBloodMEAN.compare: %d\n",
-             pressBloodMEAN.compare(
-                 pOBX->getObservationIdentifier()->getText()->getData()));
-      printf("pressBloodMEAN: %s\n",
-             pOBX->getObservationIdentifier()->getText()->getData());
       setIsBloodPressure(true);
       setPressBldMean(atoi(pOBX->getObservationValue()->getData()));
     } else if (!temperature.compare(

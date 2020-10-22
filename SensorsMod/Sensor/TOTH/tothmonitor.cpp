@@ -57,7 +57,6 @@ void *TothMonitor::sensorListen(void *arg) {
             // TODO: informar o resultado para a camada de aplicação
             monitor->messageProcess();
             pthread_mutex_lock(&m_tothCommMutex);
-            LOG_F(INFO, "pthread_mutex_lock(&m_tothCommMutex)");
             if (monitor->getIsTemperature() == true) {
               monitor->setTempReaded(monitor->getTemperature());
               monitor->setTempReady(true);
@@ -65,33 +64,13 @@ void *TothMonitor::sensorListen(void *arg) {
               monitor->setSpO2Readed(monitor->getOximeter());
               monitor->setSpo2Ready(true);
             } else if (monitor->getIsBloodPressure() == true) {
-              LOG_F(INFO, "monitor->getIsBloodPressure(): %d",
-                    monitor->getIsBloodPressure());
-
-              int value;
-              value = monitor->getPressBldSys();
-              monitor->setPressBldSys(value);
-              LOG_F(INFO, "monitor->getPressBldSys(): %d",
-                    monitor->getPressBldSys());
-              LOG_F(INFO, "m_pressBloodSys: %d", monitor->m_pressBloodSys);
-
-              value = monitor->getPressBldDia();
-              monitor->setPressBldDia(value);
-              LOG_F(INFO, "monitor->getPressBldDia(): %d",
-                    monitor->getPressBldDia());
-              LOG_F(INFO, "m_pressBloodDia: %d", monitor->m_pressBloodDia);
-
-              value = monitor->getPressBldMean();
-              monitor->setPressBldMean(value);
-              LOG_F(INFO, "monitor->getPressBldMean(): %d",
-                    monitor->getPressBldMean());
-              LOG_F(INFO, "m_pressBloodMean: %d", monitor->m_pressBloodMean);
-
+              monitor->setPressBloodSys(monitor->getPressBldSys()); // OK
+              // monitor->setPressBldSys(monitor->getPressBldSys()); // Wrong
+              monitor->setPressBloodDia(monitor->getPressBldDia());
+              monitor->setPressBloodMean(monitor->getPressBldMean());
               monitor->setBloodReady(true);
-              LOG_F(INFO, "monitor->setBloodReady(true)");
             }
             pthread_mutex_unlock(&m_tothCommMutex);
-            LOG_F(INFO, "pthread_mutex_unlock(&m_tothCommMutex)");
             machState = MonitorCommStatus::WaitingConfirmation;
           }
         }

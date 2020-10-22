@@ -146,6 +146,8 @@ void SensorProtocol::prepare_json_oximetry() {
     create_json_object(jobj_actual, "type", (void *)7, Type::Int);
     create_json_object(jobj_actual, "serial", (void *)serial().c_str(),
                        Type::String);
+    create_json_object(jobj_actual, "address", (void *)m_addr.c_str(),
+                       Type::String);
     create_json_object(jobj_actual, "connected", (void *)(true), Type::Boolean);
     create_json_object(jobj_actual, "oximetry", &m_spo2, Type::Double);
     create_json_object(jobj_actual, "date", (void *)date().c_str(),
@@ -181,6 +183,8 @@ void SensorProtocol::prepare_json_BodyTemperature() {
     create_json_object(jobj_actual, "type", (void *)8, Type::Int);
     create_json_object(jobj_actual, "serial", (void *)serial().c_str(),
                        Type::String);
+    create_json_object(jobj_actual, "address", (void *)m_addr.c_str(),
+                       Type::String);
     create_json_object(jobj_actual, "connected", (void *)(true), Type::Boolean);
     create_json_object(jobj_actual, "temperature", &m_temp, Type::Double);
     create_json_object(jobj_actual, "date", (void *)date().c_str(),
@@ -205,7 +209,7 @@ void SensorProtocol::prepare_json_BodyTemperature() {
 void SensorProtocol::prepare_json_BloodPressure() {
 
   /* PrintProtocol JSON:
-  "type": 14,
+  "type": 9,
   "serial": "7558100415344-106-0",
   "address": "192.168.0.1",
   "connected": "true",
@@ -216,6 +220,8 @@ void SensorProtocol::prepare_json_BloodPressure() {
   if (connected()) {
     create_json_object(jobj_actual, "type", (void *)9, Type::Int);
     create_json_object(jobj_actual, "serial", (void *)serial().c_str(),
+                       Type::String);
+    create_json_object(jobj_actual, "address", (void *)m_addr.c_str(),
                        Type::String);
     create_json_object(jobj_actual, "connected", (void *)(true), Type::Boolean);
     create_json_object(jobj_actual, "systolic", &m_pressBloodSys, Type::Int);

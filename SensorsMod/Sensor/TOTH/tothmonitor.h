@@ -108,6 +108,23 @@ public:
     return next;
   }
 
+  string getEquipAddress() override {
+    string address = 0;
+    pthread_mutex_lock(&m_tothCommMutex);
+    address = m_address;
+    setAddressReady(false);
+    pthread_mutex_unlock(&m_tothCommMutex);
+    return address;
+  }
+
+  bool isEquipAddressReady() override {
+    bool ready = 0;
+    pthread_mutex_lock(&m_tothCommMutex);
+    ready = m_addressReady;
+    pthread_mutex_unlock(&m_tothCommMutex);
+    return ready;
+  }
+
   inline void setTempReaded(double value) { m_temp = value; }
   inline void setTempReady(bool tempReady) { m_tempReady = tempReady; }
 
@@ -129,6 +146,11 @@ public:
     m_pressBloodMean = pressBloodMean;
   }
 
+  inline void setAddress(string address) { m_address = address; }
+  inline void setAddressReady(bool addressReady) {
+    m_addressReady = addressReady;
+  }
+
 private:
   pthread_t ptid;
   HL7SocketServer *m_hl7Serv;
@@ -143,6 +165,9 @@ private:
   int m_pressBloodMean;
   bool m_bloodPressReady;
   bool m_bNextRegister;
+  string m_address;
+  bool m_addressReady;
+
   static pthread_mutex_t m_tothCommMutex;
 };
 

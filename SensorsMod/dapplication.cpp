@@ -70,6 +70,10 @@ void DApplication::exec() {
   LOG_F(INFO, "Sensors Daemon Started!!");
 
   while (true) {
+
+    if (m_sensors->isEquipAddressReady()) {
+      this->m_sensProto->setAddr(m_sensors->getEquipAddress());
+    }
     if (m_sensors->isSpo2Ready()) {
       double spo2 = m_sensors->getSpO2();
       this->m_sensProto->setConnected(true);

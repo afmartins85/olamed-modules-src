@@ -15,7 +15,6 @@
  * along with Auriga HL7 library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef __OBX_v24_H__
 #define __OBX_v24_H__
 
@@ -35,10 +34,10 @@ namespace HL7_24 {
 
 /* Observation/Result */
 class OBX : public HL7Segment {
- public:
+public:
   OBX() { this->init(); }
 
- private:
+private:
   /* */
   enum FIELD_ID {
     OBX_1,
@@ -60,14 +59,15 @@ class OBX : public HL7Segment {
     OBX_17,
     OBX_18,
     OBX_19,
+    OBX_20, // Protocol Version 2.6
     FIELD_ID_MAX
   };
 
- public:
-  const char* className() const { return "OBX"; }
-  OBX* create() const { return new OBX(); }
+public:
+  const char *className() const { return "OBX"; }
+  OBX *create() const { return new OBX(); }
 
- private:
+private:
   void init() {
     setName("OBX");
     /* Init members */
@@ -90,21 +90,22 @@ class OBX : public HL7Segment {
     addObject<CE>(OBX_17, "OBX.17", HL7::optional, HL7::repetition_on);
     addObject<EI>(OBX_18, "OBX.18", HL7::optional, HL7::repetition_on);
     addObject<TS>(OBX_19, "OBX.19", HL7::optional, HL7::repetition_off);
+    addObject<CE>(OBX_20, "OBX.20", HL7::initialized, HL7::repetition_off);
     linkObjects(OBX_2, OBX_5);
   }
 
- public:
+public:
   /* Getters */
   /****************************************
    * Set ID - OBX
    */
 
-  SI* getOBX_1(size_t index = 0) {
-    return (SI*)this->getObjectSafe(index, OBX_1);
+  SI *getOBX_1(size_t index = 0) {
+    return (SI *)this->getObjectSafe(index, OBX_1);
   }
 
-  SI* getSetIDOBX(size_t index = 0) {
-    return (SI*)this->getObjectSafe(index, OBX_1);
+  SI *getSetIDOBX(size_t index = 0) {
+    return (SI *)this->getObjectSafe(index, OBX_1);
   }
 
   bool isOBX_1(size_t index = 0) {
@@ -127,12 +128,12 @@ class OBX : public HL7Segment {
    * Value Type
    */
 
-  ID* getOBX_2(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, OBX_2);
+  ID *getOBX_2(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, OBX_2);
   }
 
-  ID* getValueType(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, OBX_2);
+  ID *getValueType(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, OBX_2);
   }
 
   bool isOBX_2(size_t index = 0) {
@@ -155,12 +156,12 @@ class OBX : public HL7Segment {
    * Observation Identifier
    */
 
-  CE* getOBX_3(size_t index = 0) {
-    return (CE*)this->getObjectSafe(index, OBX_3);
+  CE *getOBX_3(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, OBX_3);
   }
 
-  CE* getObservationIdentifier(size_t index = 0) {
-    return (CE*)this->getObjectSafe(index, OBX_3);
+  CE *getObservationIdentifier(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, OBX_3);
   }
 
   bool isOBX_3(size_t index = 0) {
@@ -183,12 +184,12 @@ class OBX : public HL7Segment {
    * Observation Sub-Id
    */
 
-  ST* getOBX_4(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, OBX_4);
+  ST *getOBX_4(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, OBX_4);
   }
 
-  ST* getObservationSubId(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, OBX_4);
+  ST *getObservationSubId(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, OBX_4);
   }
 
   bool isOBX_4(size_t index = 0) {
@@ -211,11 +212,11 @@ class OBX : public HL7Segment {
    * Observation Value
    */
 
-  HL7Object* getOBX_5(size_t index = 0) {
+  HL7Object *getOBX_5(size_t index = 0) {
     return (this->getObjectSafe(index, OBX_5));
   }
 
-  HL7Object* getObservationValue(size_t index = 0) {
+  HL7Object *getObservationValue(size_t index = 0) {
     return (this->getObjectSafe(index, OBX_5));
   }
 
@@ -239,12 +240,12 @@ class OBX : public HL7Segment {
    * Units
    */
 
-  CE* getOBX_6(size_t index = 0) {
-    return (CE*)this->getObjectSafe(index, OBX_6);
+  CE *getOBX_6(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, OBX_6);
   }
 
-  CE* getUnits(size_t index = 0) {
-    return (CE*)this->getObjectSafe(index, OBX_6);
+  CE *getUnits(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, OBX_6);
   }
 
   bool isOBX_6(size_t index = 0) {
@@ -267,12 +268,12 @@ class OBX : public HL7Segment {
    * References Range
    */
 
-  ST* getOBX_7(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, OBX_7);
+  ST *getOBX_7(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, OBX_7);
   }
 
-  ST* getReferencesRange(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, OBX_7);
+  ST *getReferencesRange(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, OBX_7);
   }
 
   bool isOBX_7(size_t index = 0) {
@@ -295,12 +296,12 @@ class OBX : public HL7Segment {
    * Abnormal Flags
    */
 
-  IS* getOBX_8(size_t index = 0) {
-    return (IS*)this->getObjectSafe(index, OBX_8);
+  IS *getOBX_8(size_t index = 0) {
+    return (IS *)this->getObjectSafe(index, OBX_8);
   }
 
-  IS* getAbnormalFlags(size_t index = 0) {
-    return (IS*)this->getObjectSafe(index, OBX_8);
+  IS *getAbnormalFlags(size_t index = 0) {
+    return (IS *)this->getObjectSafe(index, OBX_8);
   }
 
   bool isOBX_8(size_t index = 0) {
@@ -323,12 +324,12 @@ class OBX : public HL7Segment {
    * Probability
    */
 
-  NM* getOBX_9(size_t index = 0) {
-    return (NM*)this->getObjectSafe(index, OBX_9);
+  NM *getOBX_9(size_t index = 0) {
+    return (NM *)this->getObjectSafe(index, OBX_9);
   }
 
-  NM* getProbability(size_t index = 0) {
-    return (NM*)this->getObjectSafe(index, OBX_9);
+  NM *getProbability(size_t index = 0) {
+    return (NM *)this->getObjectSafe(index, OBX_9);
   }
 
   bool isOBX_9(size_t index = 0) {
@@ -351,12 +352,12 @@ class OBX : public HL7Segment {
    * Nature of Abnormal Test
    */
 
-  ID* getOBX_10(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, OBX_10);
+  ID *getOBX_10(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, OBX_10);
   }
 
-  ID* getNatureOfAbnormalTest(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, OBX_10);
+  ID *getNatureOfAbnormalTest(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, OBX_10);
   }
 
   bool isOBX_10(size_t index = 0) {
@@ -379,12 +380,12 @@ class OBX : public HL7Segment {
    * Observation Result Status
    */
 
-  ID* getOBX_11(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, OBX_11);
+  ID *getOBX_11(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, OBX_11);
   }
 
-  ID* getObservationResultStatus(size_t index = 0) {
-    return (ID*)this->getObjectSafe(index, OBX_11);
+  ID *getObservationResultStatus(size_t index = 0) {
+    return (ID *)this->getObjectSafe(index, OBX_11);
   }
 
   bool isOBX_11(size_t index = 0) {
@@ -407,12 +408,12 @@ class OBX : public HL7Segment {
    * Date Last Observation Normal Value
    */
 
-  TS* getOBX_12(size_t index = 0) {
-    return (TS*)this->getObjectSafe(index, OBX_12);
+  TS *getOBX_12(size_t index = 0) {
+    return (TS *)this->getObjectSafe(index, OBX_12);
   }
 
-  TS* getDateLastObservationNormalValue(size_t index = 0) {
-    return (TS*)this->getObjectSafe(index, OBX_12);
+  TS *getDateLastObservationNormalValue(size_t index = 0) {
+    return (TS *)this->getObjectSafe(index, OBX_12);
   }
 
   bool isOBX_12(size_t index = 0) {
@@ -435,12 +436,12 @@ class OBX : public HL7Segment {
    * User Defined Access Checks
    */
 
-  ST* getOBX_13(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, OBX_13);
+  ST *getOBX_13(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, OBX_13);
   }
 
-  ST* getUserDefinedAccessChecks(size_t index = 0) {
-    return (ST*)this->getObjectSafe(index, OBX_13);
+  ST *getUserDefinedAccessChecks(size_t index = 0) {
+    return (ST *)this->getObjectSafe(index, OBX_13);
   }
 
   bool isOBX_13(size_t index = 0) {
@@ -463,12 +464,12 @@ class OBX : public HL7Segment {
    * Date/Time of the Observation
    */
 
-  TS* getOBX_14(size_t index = 0) {
-    return (TS*)this->getObjectSafe(index, OBX_14);
+  TS *getOBX_14(size_t index = 0) {
+    return (TS *)this->getObjectSafe(index, OBX_14);
   }
 
-  TS* getDateTimeOfTheObservation(size_t index = 0) {
-    return (TS*)this->getObjectSafe(index, OBX_14);
+  TS *getDateTimeOfTheObservation(size_t index = 0) {
+    return (TS *)this->getObjectSafe(index, OBX_14);
   }
 
   bool isOBX_14(size_t index = 0) {
@@ -491,12 +492,12 @@ class OBX : public HL7Segment {
    * Producer's ID
    */
 
-  CE* getOBX_15(size_t index = 0) {
-    return (CE*)this->getObjectSafe(index, OBX_15);
+  CE *getOBX_15(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, OBX_15);
   }
 
-  CE* getProducerSID(size_t index = 0) {
-    return (CE*)this->getObjectSafe(index, OBX_15);
+  CE *getProducerSID(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, OBX_15);
   }
 
   bool isOBX_15(size_t index = 0) {
@@ -519,12 +520,12 @@ class OBX : public HL7Segment {
    * Responsible Observer
    */
 
-  XCN* getOBX_16(size_t index = 0) {
-    return (XCN*)this->getObjectSafe(index, OBX_16);
+  XCN *getOBX_16(size_t index = 0) {
+    return (XCN *)this->getObjectSafe(index, OBX_16);
   }
 
-  XCN* getResponsibleObserver(size_t index = 0) {
-    return (XCN*)this->getObjectSafe(index, OBX_16);
+  XCN *getResponsibleObserver(size_t index = 0) {
+    return (XCN *)this->getObjectSafe(index, OBX_16);
   }
 
   bool isOBX_16(size_t index = 0) {
@@ -547,12 +548,12 @@ class OBX : public HL7Segment {
    * Observation Method
    */
 
-  CE* getOBX_17(size_t index = 0) {
-    return (CE*)this->getObjectSafe(index, OBX_17);
+  CE *getOBX_17(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, OBX_17);
   }
 
-  CE* getObservationMethod(size_t index = 0) {
-    return (CE*)this->getObjectSafe(index, OBX_17);
+  CE *getObservationMethod(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, OBX_17);
   }
 
   bool isOBX_17(size_t index = 0) {
@@ -575,12 +576,12 @@ class OBX : public HL7Segment {
    * Equipment Instance Identifier
    */
 
-  EI* getOBX_18(size_t index = 0) {
-    return (EI*)this->getObjectSafe(index, OBX_18);
+  EI *getOBX_18(size_t index = 0) {
+    return (EI *)this->getObjectSafe(index, OBX_18);
   }
 
-  EI* getEquipmentInstanceIdentifier(size_t index = 0) {
-    return (EI*)this->getObjectSafe(index, OBX_18);
+  EI *getEquipmentInstanceIdentifier(size_t index = 0) {
+    return (EI *)this->getObjectSafe(index, OBX_18);
   }
 
   bool isOBX_18(size_t index = 0) {
@@ -603,12 +604,12 @@ class OBX : public HL7Segment {
    * Date/Time of the Analysis
    */
 
-  TS* getOBX_19(size_t index = 0) {
-    return (TS*)this->getObjectSafe(index, OBX_19);
+  TS *getOBX_19(size_t index = 0) {
+    return (TS *)this->getObjectSafe(index, OBX_19);
   }
 
-  TS* getDateTimeOfTheAnalysis(size_t index = 0) {
-    return (TS*)this->getObjectSafe(index, OBX_19);
+  TS *getDateTimeOfTheAnalysis(size_t index = 0) {
+    return (TS *)this->getObjectSafe(index, OBX_19);
   }
 
   bool isOBX_19(size_t index = 0) {
@@ -622,6 +623,34 @@ class OBX : public HL7Segment {
   bool isDateTimeOfTheAnalysis(size_t index = 0) {
     try {
       return this->getObject(index, OBX_19) != NULL;
+    } catch (...) {
+    }
+    return false;
+  }
+
+  /****************************************
+   * Observation Site --> 2.6 Protocol
+   */
+
+  CE *getOBX_20(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, OBX_20);
+  }
+
+  CE *getObservationSite(size_t index = 0) {
+    return (CE *)this->getObjectSafe(index, OBX_20);
+  }
+
+  bool isOBX_20(size_t index = 0) {
+    try {
+      return this->getObject(index, OBX_20) != NULL;
+    } catch (...) {
+    }
+    return false;
+  }
+
+  bool isObservationSite(size_t index = 0) {
+    try {
+      return this->getObject(index, OBX_20) != NULL;
     } catch (...) {
     }
     return false;

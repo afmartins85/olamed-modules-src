@@ -69,6 +69,9 @@ void *TothMonitor::sensorListen(void *arg) {
               monitor->setPressBloodDia(monitor->getPressBldDia());
               monitor->setPressBloodMean(monitor->getPressBldMean());
               monitor->setBloodReady(true);
+            } else if (monitor->getIsEquipAddress() == true) {
+              monitor->setAddress(monitor->getEquipAddress());
+              monitor->setAddressReady(true);
             }
             pthread_mutex_unlock(&m_tothCommMutex);
             machState = MonitorCommStatus::WaitingConfirmation;

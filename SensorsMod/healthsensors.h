@@ -1,6 +1,9 @@
 #ifndef HEALTHSENSORS_H
 #define HEALTHSENSORS_H
 
+#include <iostream>
+using namespace std;
+
 class HealthSensors {
 public:
   HealthSensors();
@@ -14,6 +17,8 @@ public:
   virtual int getPressBloodMean() = 0;
   virtual bool isBlooPressReady() = 0;
   virtual void isNextRegister(bool next) = 0;
+  virtual string getEquipAddress() = 0;
+  virtual bool isEquipAddressReady() = 0;
 };
 
 #endif // HEALTHSENSORS_H

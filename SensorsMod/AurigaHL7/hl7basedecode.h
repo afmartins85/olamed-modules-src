@@ -62,6 +62,16 @@ public:
     m_pressBloodMean = pressBloodMean;
   }
 
+  string getEquipAddress() const { return m_equipAddress; }
+  void setEquipAddress(const string &equipAddress) {
+    m_equipAddress = equipAddress;
+  }
+
+  bool getIsEquipAddress() const { return m_isEquipAddress; }
+  void setIsEquipAddress(bool isEquipAddress) {
+    m_isEquipAddress = isEquipAddress;
+  }
+
 private:
   HL7_24::MSH *m_MSH;
   // HL7_24::OBX *m_OBX;
@@ -78,6 +88,9 @@ private:
 
   double m_oximeter;
   bool m_isOximeter;
+
+  string m_equipAddress;
+  bool m_isEquipAddress;
 };
 
 #endif // HL7BASEDECODE_H

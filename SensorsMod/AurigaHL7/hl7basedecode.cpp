@@ -176,12 +176,12 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
     LOG_F(9, "%s", OBXstr.c_str());
 
     string dataField;
-    int delimiterCount = 1;
+    int delimiterCount = 0;
 
     HL7_24::OBX *m_OBX = new HL7_24::OBX;
 
     for (size_t idx = 0; idx < OBXstr.length(); ++idx) {
-      if (OBXstr[idx] == '|') {
+      if ((OBXstr[idx] == '|') || ((idx + 1) == OBXstr.length())) {
         switch (delimiterCount) {
         case 1:
           m_OBX->getSetIDOBX()->setData(dataField);
@@ -189,7 +189,7 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
         case 2:
           m_OBX->getValueType()->setData(dataField);
           break;
-        case 4: { // Scope delimiter
+        case 3: { // Scope delimiter
           string subStr;
           int delimiter2 = 1;
           for (size_t i = 0; i < dataField.size(); ++i) {
@@ -211,13 +211,13 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
               subStr);
         } // Scope delimiter
         break;
-        case 5:
+        case 4:
           m_OBX->getObservationSubId()->setData(dataField);
           break;
-        case 6:
+        case 5:
           m_OBX->getObservationValue()->setData(dataField);
           break;
-        case 7: { // Scope delimiter
+        case 6: { // Scope delimiter
           string subStr;
           int delimiter2 = 1;
           for (size_t i = 0; i < dataField.size(); ++i) {
@@ -237,29 +237,33 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
           m_OBX->getUnits()->getNameOfCodingSystem()->setData(subStr);
         } // Scope delimiter
         break;
-        case 8:
+        case 7:
           m_OBX->getReferencesRange()->setData(dataField);
           break;
-          //        case 19: { // Scope delimiter
-          //          string subStr;
-          //          int delimiter2 = 1;
-          //          for (size_t i = 0; i < dataField.size(); ++i) {
-          //            if (dataField[i] == '^') {
-          //              if (delimiter2 == 1) {
-          //                m_OBX->getUnits()->getIdentifier()->setData(subStr);
-          //                delimiter2++;
-          //                subStr.clear();
-          //              } else {
-          //                m_OBX->getUnits()->getText()->setData(subStr);
-          //                subStr.clear();
-          //              }
-          //            } else {
-          //              subStr.push_back(dataField[i]);
-          //            }
-          //          }
-          //          m_OBX->getUnits()->getNameOfCodingSystem()->setData(subStr);
-          //        } // Scope delimiter
-          //        break;
+        case 18: { // Scope delimiter
+          string subStr;
+          int delimiter2 = 1;
+          for (size_t i = 0; i < dataField.size(); ++i) {
+            if (dataField[i] == '^') {
+              if (delimiter2 == 1) {
+                m_OBX->getEquipmentInstanceIdentifier()
+                    ->getEntityIdentifier()
+                    ->setData(subStr);
+                delimiter2++;
+                subStr.clear();
+              } else {
+                m_OBX->getEquipmentInstanceIdentifier()
+                    ->getNamespaceID()
+                    ->setData(subStr);
+                subStr.clear();
+              }
+            } else {
+              subStr.push_back(dataField[i]);
+            }
+          }
+          m_OBX->getUnits()->getNameOfCodingSystem()->setData(subStr);
+        } // Scope delimiter
+        break;
         }
         delimiterCount++;
         dataField.clear();
@@ -267,6 +271,7 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
         dataField.push_back(OBXstr[idx]);
       }
     }
+    LOG_F(WARNING, "delimiterCount %d", delimiterCount);
     m_OBXList.push_back(m_OBX);
   }
 
@@ -284,6 +289,12 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
     LOG_F(9, "%s", m_OBX->getUnits()->getText()->getData());
     LOG_F(9, "%s", m_OBX->getUnits()->getNameOfCodingSystem()->getData());
     LOG_F(9, "References Range: %s", m_OBX->getReferencesRange()->getData());
+    LOG_F(9, "Obs Equip. id: %s",
+          m_OBX->getEquipmentInstanceIdentifier()
+              ->getEntityIdentifier()
+              ->getData());
+    LOG_F(9, "Obs Equip. text: %s",
+          m_OBX->getEquipmentInstanceIdentifier()->getNamespaceID()->getData());
   }
 
   m_eHL7BaseError = HL7BaseError::MessageOk;
@@ -355,6 +366,11 @@ void HL7BaseDecode::messageProcess() {
                    pOBX->getObservationIdentifier()->getText()->getData())) {
       setIsOximeter(true);
       setOximeter(atof(pOBX->getObservationValue()->getData()) / 100);
+    } else if (!strcmp(pOBX->getSetIDOBX()->getData(), "1")) {
+      setIsEquipAddress(true);
+      setEquipAddress(pOBX->getEquipmentInstanceIdentifier()
+                          ->getEntityIdentifier()
+                          ->getData());
     }
   }
 

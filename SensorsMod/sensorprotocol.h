@@ -43,7 +43,7 @@ public:
 
   void prepare_json_oximetry();
   void prepare_json_BodyTemperature();
-  void prepare_json_BloodPressure();
+  void prepare_json_BloodPressure(int Sys, int Dia, int Mean);
 
   inline string addr() const { return m_addr; }
   inline void setAddr(const string &addr) { m_addr = addr; }
@@ -54,21 +54,6 @@ public:
   inline double temp() const { return m_temp; }
   inline void setTemp(double temp) { m_temp = temp; }
 
-  inline int pressBloodSys() const { return m_pressBloodSys; }
-  inline void setPressBloodSys(int pressBloodSys) {
-    m_pressBloodSys = pressBloodSys;
-  }
-
-  inline int pressBloodDia() const { return m_pressBloodDia; }
-  inline void setPressBloodDia(int pressBloodDia) {
-    m_pressBloodDia = pressBloodDia;
-  }
-
-  inline int pressBloodMean() const { return m_pressBloodMean; }
-  inline void setPressBloodMean(int pressBloodMean) {
-    m_pressBloodMean = pressBloodMean;
-  }
-
 private:
   uint64_t m_type;
   string m_serial;
@@ -78,9 +63,6 @@ private:
   string m_addr;
   double m_spo2;
   double m_temp;
-  int m_pressBloodSys;
-  int m_pressBloodDia;
-  int m_pressBloodMean;
 
   string m_json_message;
 

@@ -9,7 +9,7 @@ pthread_mutex_t TothMonitor::m_tothCommMutex(PTHREAD_MUTEX_INITIALIZER);
 TothMonitor::TothMonitor()
     : m_temp(0), m_tempReady(false), m_spo2(0), m_spo2Ready(false),
       m_pressBloodSys(0), m_pressBloodDia(0), m_pressBloodMean(0),
-      m_bloodPressReady(false), m_addressReady(false) {
+      m_bloodPressReady(false), m_addressReady(false), m_serialReady(false) {
 
   // create socket server
   this->m_hl7Serv = new HL7SocketServer(50000);
@@ -64,14 +64,18 @@ void *TothMonitor::sensorListen(void *arg) {
               monitor->setSpO2Readed(monitor->getOximeter());
               monitor->setSpo2Ready(true);
             } else if (monitor->getIsBloodPressure() == true) {
-              monitor->setPressBloodSys(monitor->getPressBldSys()); // OK
-              // monitor->setPressBldSys(monitor->getPressBldSys()); // Wrong
+              monitor->setPressBloodSys(monitor->getPressBldSys());
               monitor->setPressBloodDia(monitor->getPressBldDia());
               monitor->setPressBloodMean(monitor->getPressBldMean());
               monitor->setBloodReady(true);
-            } else if (monitor->getIsEquipAddress() == true) {
-              monitor->setAddress(monitor->getEquipAddress());
+            }
+            if (monitor->getIsEquipAddress() == true) {
+              monitor->setAddress(monitor->gethl7baseEquipAddress());
               monitor->setAddressReady(true);
+            }
+            if (monitor->gethl7baseIsSerial() == true) {
+              monitor->setSerial(monitor->gethl7baseSerial());
+              monitor->setSerialReady(true);
             }
             pthread_mutex_unlock(&m_tothCommMutex);
             machState = MonitorCommStatus::WaitingConfirmation;
@@ -81,7 +85,7 @@ void *TothMonitor::sensorListen(void *arg) {
     } else if (machState == MonitorCommStatus::WaitingConfirmation) {
       if (monitor->getNextRegister() == true) {
         // Send Acknowledge
-        // monitor->sendAckMessage(monitor->m_mllp);
+        monitor->sendAckMessage(monitor->m_mllp);
         if (monitor->getError() == HL7BaseError::MessageOk) {
           machState = MonitorCommStatus::ReceiveMessage;
         } else {

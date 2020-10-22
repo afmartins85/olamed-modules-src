@@ -9,7 +9,7 @@ using namespace std;
 /**
  * @brief HL7BaseDecode::HL7BaseDecode
  */
-HL7BaseDecode::HL7BaseDecode() {
+HL7BaseDecode::HL7BaseDecode() : m_isEquipAddress(false) {
   m_MSH = new HL7_24::MSH;
   // m_OBX = new HL7_24::OBX;
 }
@@ -366,12 +366,17 @@ void HL7BaseDecode::messageProcess() {
                    pOBX->getObservationIdentifier()->getText()->getData())) {
       setIsOximeter(true);
       setOximeter(atof(pOBX->getObservationValue()->getData()) / 100);
-    } else if (!strcmp(pOBX->getSetIDOBX()->getData(), "1")) {
+    }
+    if (!strcmp(pOBX->getSetIDOBX()->getData(), "1")) {
       setIsEquipAddress(true);
       setEquipAddress(pOBX->getEquipmentInstanceIdentifier()
                           ->getEntityIdentifier()
                           ->getData());
     }
+  }
+  if (m_MSH->getMSH_3()->getHD_2()->getData() != nullptr) {
+    sethl7baseSerial(m_MSH->getMSH_3()->getHD_2()->getData());
+    sethl7baseIsSerial(true);
   }
 
   this->clearOBXList();

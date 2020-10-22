@@ -19,6 +19,8 @@ public:
   virtual void isNextRegister(bool next) = 0;
   virtual string getEquipAddress() = 0;
   virtual bool isEquipAddressReady() = 0;
+  virtual string getSerialSensor() = 0;
+  virtual bool isSerialSensorReady() = 0;
 };
 
 #endif // HEALTHSENSORS_H

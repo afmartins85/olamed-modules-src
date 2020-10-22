@@ -206,7 +206,7 @@ void SensorProtocol::prepare_json_BodyTemperature() {
 /**
  * @brief SensorProtocol::prepare_json_BloodPressure
  */
-void SensorProtocol::prepare_json_BloodPressure() {
+void SensorProtocol::prepare_json_BloodPressure(int Sys, int Dia, int Mean) {
 
   /* PrintProtocol JSON:
   "type": 9,
@@ -224,9 +224,9 @@ void SensorProtocol::prepare_json_BloodPressure() {
     create_json_object(jobj_actual, "address", (void *)m_addr.c_str(),
                        Type::String);
     create_json_object(jobj_actual, "connected", (void *)(true), Type::Boolean);
-    create_json_object(jobj_actual, "systolic", &m_pressBloodSys, Type::Int);
-    create_json_object(jobj_actual, "diastolic", &m_pressBloodDia, Type::Int);
-    create_json_object(jobj_actual, "mean", &m_pressBloodMean, Type::Int);
+    create_json_object(jobj_actual, "systolic", (void *)Sys, Type::Int);
+    create_json_object(jobj_actual, "diastolic", (void *)Dia, Type::Int);
+    create_json_object(jobj_actual, "mean", (void *)Mean, Type::Int);
     create_json_object(jobj_actual, "date", (void *)date().c_str(),
                        Type::String);
   } else {

@@ -71,6 +71,10 @@ void DApplication::exec() {
 
   while (true) {
 
+    if (m_sensors->isSerialSensorReady()) {
+      LOG_F(INFO, "isSerialSensorReady!!");
+      this->m_sensProto->setSerial(m_sensors->getSerialSensor());
+    }
     if (m_sensors->isEquipAddressReady()) {
       LOG_F(INFO, "isEquipAddressReady!!");
       this->m_sensProto->setAddr(m_sensors->getEquipAddress());
@@ -99,14 +103,13 @@ void DApplication::exec() {
       this->m_sensProto->setConnected(true);
       this->m_sensProto->DateTime();
       this->m_sensProto->setDate(this->m_sensProto->datetime());
-      this->m_sensProto->setPressBloodSys(m_sensors->getPressBloodSys());
-      this->m_sensProto->setPressBloodDia(m_sensors->getPressBloodDia());
-      this->m_sensProto->setPressBloodMean(m_sensors->getPressBloodMean());
-      this->m_sensProto->prepare_json_BloodPressure();
+      int Sys = m_sensors->getPressBloodSys();
+      int Dia = m_sensors->getPressBloodDia();
+      int Mean = m_sensors->getPressBloodMean();
+      this->m_sensProto->prepare_json_BloodPressure(Sys, Dia, Mean);
       this->m_ptr_Socket->setMessage(
           const_cast<char *>((this->m_sensProto->json_message()).c_str()));
       this->m_ptr_Socket->clientSendMessage();
-      printf("MESAAGE SENT TO SERVER !!!!!!!!");
     }
 
     // Machine states for connection handle

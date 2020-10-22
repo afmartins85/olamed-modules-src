@@ -109,7 +109,7 @@ public:
   }
 
   string getEquipAddress() override {
-    string address = 0;
+    string address;
     pthread_mutex_lock(&m_tothCommMutex);
     address = m_address;
     setAddressReady(false);
@@ -121,6 +121,23 @@ public:
     bool ready = 0;
     pthread_mutex_lock(&m_tothCommMutex);
     ready = m_addressReady;
+    pthread_mutex_unlock(&m_tothCommMutex);
+    return ready;
+  }
+
+  string getSerialSensor() override {
+    string serial;
+    pthread_mutex_lock(&m_tothCommMutex);
+    serial = m_serial;
+    setSerialReady(false);
+    pthread_mutex_unlock(&m_tothCommMutex);
+    return serial;
+  }
+
+  bool isSerialSensorReady() override {
+    bool ready = 0;
+    pthread_mutex_lock(&m_tothCommMutex);
+    ready = m_serialReady;
     pthread_mutex_unlock(&m_tothCommMutex);
     return ready;
   }
@@ -137,19 +154,34 @@ public:
   }
 
   inline void setPressBloodSys(int pressBloodSys) {
+    LOG_F(INFO, "pressBloodSys: %d", pressBloodSys);
     m_pressBloodSys = pressBloodSys;
+    LOG_F(INFO, "m_pressBloodSys: %d", m_pressBloodSys);
   }
   inline void setPressBloodDia(int pressBloodDia) {
+    LOG_F(INFO, "pressBloodDia: %d", pressBloodDia);
     m_pressBloodDia = pressBloodDia;
+    LOG_F(INFO, "m_pressBloodDia: %d", m_pressBloodDia);
   }
   inline void setPressBloodMean(int pressBloodMean) {
+    LOG_F(INFO, "pressBloodMean: %d", pressBloodMean);
     m_pressBloodMean = pressBloodMean;
+    LOG_F(INFO, "m_pressBloodMean: %d", m_pressBloodMean);
   }
 
-  inline void setAddress(string address) { m_address = address; }
+  void setAddress(const string &address) {
+    m_address = address;
+    LOG_F(INFO, "m_address : %s", m_address.c_str());
+  }
   inline void setAddressReady(bool addressReady) {
     m_addressReady = addressReady;
   }
+
+  void setSerial(const string &serial) {
+    m_serial = serial;
+    LOG_F(INFO, "m_address : %s", m_serial.c_str());
+  }
+  inline void setSerialReady(bool serialReady) { m_serialReady = serialReady; }
 
 private:
   pthread_t ptid;
@@ -167,6 +199,8 @@ private:
   bool m_bNextRegister;
   string m_address;
   bool m_addressReady;
+  string m_serial;
+  bool m_serialReady;
 
   static pthread_mutex_t m_tothCommMutex;
 };

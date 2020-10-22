@@ -62,7 +62,7 @@ public:
     m_pressBloodMean = pressBloodMean;
   }
 
-  string getEquipAddress() const { return m_equipAddress; }
+  string gethl7baseEquipAddress() const { return m_equipAddress; }
   void setEquipAddress(const string &equipAddress) {
     m_equipAddress = equipAddress;
   }
@@ -71,6 +71,12 @@ public:
   void setIsEquipAddress(bool isEquipAddress) {
     m_isEquipAddress = isEquipAddress;
   }
+
+  string gethl7baseSerial() const { return m_serial; }
+  void sethl7baseSerial(const string &serial) { m_serial = serial; }
+
+  bool gethl7baseIsSerial() const { return m_isSerial; }
+  void sethl7baseIsSerial(bool isSerial) { m_isSerial = isSerial; }
 
 private:
   HL7_24::MSH *m_MSH;
@@ -91,6 +97,8 @@ private:
 
   string m_equipAddress;
   bool m_isEquipAddress;
+  string m_serial;
+  bool m_isSerial;
 };
 
 #endif // HL7BASEDECODE_H

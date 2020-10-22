@@ -162,11 +162,14 @@ void DApplication::parseMessageReceive(const char *message) {
         app->m_sensors->isNextRegister(true);
       }
     } break;
+    case 13:
+      app->m_ptr_Socket->setMessage("{ \"type\": 13, \"reply\": true }");
+      app->m_ptr_Socket->clientSendMessage();
+      break;
     default:
       LOG_F(WARNING, "Command (%d) not supported!!", type);
       break;
     }
-
   } else {
     LOG_F(ERROR, "App context is null!!!");
   }

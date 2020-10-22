@@ -72,6 +72,7 @@ void DApplication::exec() {
   while (true) {
 
     if (m_sensors->isEquipAddressReady()) {
+      LOG_F(INFO, "isEquipAddressReady!!");
       this->m_sensProto->setAddr(m_sensors->getEquipAddress());
     }
     if (m_sensors->isSpo2Ready()) {

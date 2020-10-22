@@ -9,7 +9,7 @@ pthread_mutex_t TothMonitor::m_tothCommMutex(PTHREAD_MUTEX_INITIALIZER);
 TothMonitor::TothMonitor()
     : m_temp(0), m_tempReady(false), m_spo2(0), m_spo2Ready(false),
       m_pressBloodSys(0), m_pressBloodDia(0), m_pressBloodMean(0),
-      m_bloodPressReady(false) {
+      m_bloodPressReady(false), m_addressReady(false) {
 
   // create socket server
   this->m_hl7Serv = new HL7SocketServer(50000);

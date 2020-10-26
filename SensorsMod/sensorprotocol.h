@@ -48,8 +48,8 @@ public:
   inline string addr() const { return m_addr; }
   inline void setAddr(const string &addr) { m_addr = addr; }
 
-  inline double spo2() const { return m_spo2; }
-  inline void setSpo2(double spo2) { m_spo2 = spo2; }
+  inline int spo2() const { return m_spo2; }
+  inline void setSpo2(int spo2) { m_spo2 = spo2; }
 
   inline double temp() const { return m_temp; }
   inline void setTemp(double temp) { m_temp = temp; }
@@ -61,7 +61,7 @@ private:
   bool m_connected;
   string m_date;
   string m_addr;
-  double m_spo2;
+  int m_spo2;
   double m_temp;
 
   string m_json_message;

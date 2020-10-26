@@ -43,8 +43,8 @@ public:
     return ready;
   }
 
-  double getSpO2() override {
-    double spo2 = 0;
+  int getSpO2() override {
+    int spo2 = 0;
     pthread_mutex_lock(&m_tothCommMutex);
     spo2 = m_spo2;
     setSpo2Ready(false);
@@ -146,7 +146,7 @@ public:
   inline void setTempReady(bool tempReady) { m_tempReady = tempReady; }
 
   //! Set SpO2 value readed.
-  inline void setSpO2Readed(double value) { m_spo2 = value; }
+  inline void setSpO2Readed(int value) { m_spo2 = value; }
   inline void setSpo2Ready(bool spo2Ready) { m_spo2Ready = spo2Ready; }
 
   inline void setBloodReady(bool bloodPressReady) {
@@ -154,33 +154,21 @@ public:
   }
 
   inline void setPressBloodSys(int pressBloodSys) {
-    LOG_F(INFO, "pressBloodSys: %d", pressBloodSys);
     m_pressBloodSys = pressBloodSys;
-    LOG_F(INFO, "m_pressBloodSys: %d", m_pressBloodSys);
   }
   inline void setPressBloodDia(int pressBloodDia) {
-    LOG_F(INFO, "pressBloodDia: %d", pressBloodDia);
     m_pressBloodDia = pressBloodDia;
-    LOG_F(INFO, "m_pressBloodDia: %d", m_pressBloodDia);
   }
   inline void setPressBloodMean(int pressBloodMean) {
-    LOG_F(INFO, "pressBloodMean: %d", pressBloodMean);
     m_pressBloodMean = pressBloodMean;
-    LOG_F(INFO, "m_pressBloodMean: %d", m_pressBloodMean);
   }
 
-  void setAddress(const string &address) {
-    m_address = address;
-    LOG_F(INFO, "m_address : %s", m_address.c_str());
-  }
+  void setAddress(const string &address) { m_address = address; }
   inline void setAddressReady(bool addressReady) {
     m_addressReady = addressReady;
   }
 
-  void setSerial(const string &serial) {
-    m_serial = serial;
-    LOG_F(INFO, "m_address : %s", m_serial.c_str());
-  }
+  void setSerial(const string &serial) { m_serial = serial; }
   inline void setSerialReady(bool serialReady) { m_serialReady = serialReady; }
 
 private:
@@ -190,7 +178,7 @@ private:
   HL7MLLP *m_mllp;
   double m_temp;
   bool m_tempReady;
-  double m_spo2;
+  int m_spo2;
   bool m_spo2Ready;
   int m_pressBloodSys;
   int m_pressBloodDia;

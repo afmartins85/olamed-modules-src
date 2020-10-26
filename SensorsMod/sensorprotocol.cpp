@@ -142,6 +142,11 @@ void SensorProtocol::prepare_json_oximetry() {
       "date": "2020-08-10T20:00:31Z"
   */
 
+  json_object_object_del(jobj_actual, "temperature");
+  json_object_object_del(jobj_actual, "systolic");
+  json_object_object_del(jobj_actual, "diastolic");
+  json_object_object_del(jobj_actual, "mean");
+
   if (connected()) {
     create_json_object(jobj_actual, "type", (void *)7, Type::Int);
     create_json_object(jobj_actual, "serial", (void *)serial().c_str(),
@@ -149,7 +154,7 @@ void SensorProtocol::prepare_json_oximetry() {
     create_json_object(jobj_actual, "address", (void *)m_addr.c_str(),
                        Type::String);
     create_json_object(jobj_actual, "connected", (void *)(true), Type::Boolean);
-    create_json_object(jobj_actual, "oximetry", &m_spo2, Type::Double);
+    create_json_object(jobj_actual, "oximetry", (void *)m_spo2, Type::Int);
     create_json_object(jobj_actual, "date", (void *)date().c_str(),
                        Type::String);
   } else {
@@ -178,6 +183,11 @@ void SensorProtocol::prepare_json_BodyTemperature() {
     "temperature": 36.2,
     "date": "2020-08-10T20:00:31Z"
 */
+
+  json_object_object_del(jobj_actual, "oximetry");
+  json_object_object_del(jobj_actual, "systolic");
+  json_object_object_del(jobj_actual, "diastolic");
+  json_object_object_del(jobj_actual, "mean");
 
   if (connected()) {
     create_json_object(jobj_actual, "type", (void *)8, Type::Int);
@@ -216,6 +226,9 @@ void SensorProtocol::prepare_json_BloodPressure(int Sys, int Dia, int Mean) {
   "bloodPress": 130|60,
   "date": "2020-08-10T20:00:31Z"
 */
+
+  json_object_object_del(jobj_actual, "temperature");
+  json_object_object_del(jobj_actual, "oximetry");
 
   if (connected()) {
     create_json_object(jobj_actual, "type", (void *)9, Type::Int);

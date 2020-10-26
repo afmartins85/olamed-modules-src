@@ -10,7 +10,7 @@ public:
 
   virtual double getTemp() = 0;
   virtual bool isTempReady() = 0;
-  virtual double getSpO2() = 0;
+  virtual int getSpO2() = 0;
   virtual bool isSpo2Ready() = 0;
   virtual int getPressBloodSys() = 0;
   virtual int getPressBloodDia() = 0;

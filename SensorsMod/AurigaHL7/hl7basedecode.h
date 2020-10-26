@@ -46,7 +46,7 @@ public:
   }
 
   int getOximeter() const { return m_oximeter; }
-  void setOximeter(double oximeter) { m_oximeter = oximeter; }
+  void setOximeter(int oximeter) { m_oximeter = oximeter; }
 
   bool getIsOximeter() const { return m_isOximeter; }
   void setIsOximeter(bool isOximeter) { m_isOximeter = isOximeter; }
@@ -92,7 +92,7 @@ private:
   int m_pressBloodMean;
   bool m_isPressBlood;
 
-  double m_oximeter;
+  int m_oximeter;
   bool m_isOximeter;
 
   string m_equipAddress;

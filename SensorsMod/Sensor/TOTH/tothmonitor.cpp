@@ -59,15 +59,18 @@ void *TothMonitor::sensorListen(void *arg) {
             pthread_mutex_lock(&m_tothCommMutex);
             if (monitor->getIsTemperature() == true) {
               monitor->setTempReaded(monitor->getTemperature());
+              monitor->setIsTemperature(false);
               monitor->setTempReady(true);
             } else if (monitor->getIsOximeter() == true) {
               monitor->setSpO2Readed(monitor->getOximeter());
               monitor->setSpo2Ready(true);
+              monitor->setIsOximeter(false);
             } else if (monitor->getIsBloodPressure() == true) {
               monitor->setPressBloodSys(monitor->getPressBldSys());
               monitor->setPressBloodDia(monitor->getPressBldDia());
               monitor->setPressBloodMean(monitor->getPressBldMean());
               monitor->setBloodReady(true);
+              monitor->setIsBloodPressure(false);
             }
             if (monitor->getIsEquipAddress() == true) {
               monitor->setAddress(monitor->gethl7baseEquipAddress());

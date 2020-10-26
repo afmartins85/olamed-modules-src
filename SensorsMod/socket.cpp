@@ -41,8 +41,8 @@ bool Socket::clientConnect() {
     return false;
   }
 
-  // std::string handshake("PrinterMod");
-  // send(m_sock, handshake.c_str(), handshake.size(), 0);
+  std::string handshake("sensorsMod");
+  send(m_sock, handshake.c_str(), handshake.size(), 0);
   return true;
 }
 
@@ -73,7 +73,6 @@ Socket::CConnectionState Socket::clientSelect() {
   retval = select(this->m_sock + 1, &rfds, NULL, NULL, &tv);
   /* Don't rely on the value of tv now! */
 
-  LOG_F(INFO, "retval %d", retval);
   if (retval == -1) {
     LOG_F(ERROR, "select()");
     return ForceClose;
@@ -100,13 +99,10 @@ Socket::CConnectionState Socket::clientSelect() {
  * @return
  */
 int Socket::clientSendMessage(void) {
+  LOG_F(INFO, "%s", m_message.c_str());
   if (this->ConStatus() == Connected) {
-    printf("\n ****m_message: %s ****\n", m_message.c_str());
-    printf("\n **** Antes do: send m_sock ****\n");
-    printf("\n *** m_socket: %d ****\n", m_sock);
     send(m_sock, const_cast<char *>(m_message.c_str()),
          strlen(const_cast<char *>(m_message.c_str())), 0);
-    printf("\n **** Depois do: send m_sock ****\n");
   } else {
     return -1;
   }

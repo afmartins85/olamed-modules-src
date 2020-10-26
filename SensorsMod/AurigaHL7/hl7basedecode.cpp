@@ -9,7 +9,9 @@ using namespace std;
 /**
  * @brief HL7BaseDecode::HL7BaseDecode
  */
-HL7BaseDecode::HL7BaseDecode() : m_isEquipAddress(false) {
+HL7BaseDecode::HL7BaseDecode()
+    : m_isTemperature(false), m_isPressBlood(false), m_isOximeter(false),
+      m_isEquipAddress(false), m_isSerial(false) {
   m_MSH = new HL7_24::MSH;
   // m_OBX = new HL7_24::OBX;
 }
@@ -271,7 +273,6 @@ void HL7BaseDecode::ObservationOrResult(string &data) {
         dataField.push_back(OBXstr[idx]);
       }
     }
-    LOG_F(WARNING, "delimiterCount %d", delimiterCount);
     m_OBXList.push_back(m_OBX);
   }
 
@@ -365,7 +366,7 @@ void HL7BaseDecode::messageProcess() {
     } else if (!spo2.compare(
                    pOBX->getObservationIdentifier()->getText()->getData())) {
       setIsOximeter(true);
-      setOximeter(atof(pOBX->getObservationValue()->getData()) / 100);
+      setOximeter(atoi(pOBX->getObservationValue()->getData()));
     }
     if (!strcmp(pOBX->getSetIDOBX()->getData(), "1")) {
       setIsEquipAddress(true);

@@ -15,8 +15,8 @@ DApplication *DApplication::instance_ = nullptr;
 DApplication::DApplication() {
   m_ptr_Socket = new Socket;
   this->m_ptr_Socket->setPort(8080);
-  //  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
-  this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
+  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
+  //  this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
   this->m_sensProto = new SensorProtocol;
   m_sensors = new TothMonitor;
 }
@@ -31,8 +31,8 @@ DApplication::DApplication(int argc, char *argv[]) {
   (void)argv;
   m_ptr_Socket = new Socket;
   this->m_ptr_Socket->setPort(8080);
-  //  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
-  this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
+  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
+  //  this->m_ptr_Socket->setAddress((char *)"127.0.0.1");
   this->m_sensProto = new SensorProtocol;
   m_sensors = new TothMonitor;
 }
@@ -72,15 +72,13 @@ void DApplication::exec() {
   while (true) {
 
     if (m_sensors->isSerialSensorReady()) {
-      LOG_F(INFO, "isSerialSensorReady!!");
       this->m_sensProto->setSerial(m_sensors->getSerialSensor());
     }
     if (m_sensors->isEquipAddressReady()) {
-      LOG_F(INFO, "isEquipAddressReady!!");
       this->m_sensProto->setAddr(m_sensors->getEquipAddress());
     }
     if (m_sensors->isSpo2Ready()) {
-      double spo2 = m_sensors->getSpO2();
+      int spo2 = m_sensors->getSpO2();
       this->m_sensProto->setConnected(true);
       this->m_sensProto->DateTime();
       this->m_sensProto->setDate(this->m_sensProto->datetime());

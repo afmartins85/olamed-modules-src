@@ -1,0 +1,27 @@
+[
+{
+  "directory": "/home/anderson/workspace/soha/olamed-modules-src/BalanceMod/build",
+  "command": "/bin/g++-8   -I/usr/local/include -I/usr/local/include/json-c  -g   -std=gnu++11 -o CMakeFiles/balanceMod.dir/balanceprotocol.cpp.o -c /home/anderson/workspace/soha/olamed-modules-src/BalanceMod/balanceprotocol.cpp",
+  "file": "/home/anderson/workspace/soha/olamed-modules-src/BalanceMod/balanceprotocol.cpp"
+},
+{
+  "directory": "/home/anderson/workspace/soha/olamed-modules-src/BalanceMod/build",
+  "command": "/bin/g++-8   -I/usr/local/include -I/usr/local/include/json-c  -g   -std=gnu++11 -o CMakeFiles/balanceMod.dir/dapplication.cpp.o -c /home/anderson/workspace/soha/olamed-modules-src/BalanceMod/dapplication.cpp",
+  "file": "/home/anderson/workspace/soha/olamed-modules-src/BalanceMod/dapplication.cpp"
+},
+{
+  "directory": "/home/anderson/workspace/soha/olamed-modules-src/BalanceMod/build",
+  "command": "/bin/g++-8   -I/usr/local/include -I/usr/local/include/json-c  -g   -std=gnu++11 -o CMakeFiles/balanceMod.dir/loguru.cpp.o -c /home/anderson/workspace/soha/olamed-modules-src/BalanceMod/loguru.cpp",
+  "file": "/home/anderson/workspace/soha/olamed-modules-src/BalanceMod/loguru.cpp"
+},
+{
+  "directory": "/home/anderson/workspace/soha/olamed-modules-src/BalanceMod/build",
+  "command": "/bin/g++-8   -I/usr/local/include -I/usr/local/include/json-c  -g   -std=gnu++11 -o CMakeFiles/balanceMod.dir/main.cpp.o -c /home/anderson/workspace/soha/olamed-modules-src/BalanceMod/main.cpp",
+  "file": "/home/anderson/workspace/soha/olamed-modules-src/BalanceMod/main.cpp"
+},
+{
+  "directory": "/home/anderson/workspace/soha/olamed-modules-src/BalanceMod/build",
+  "command": "/bin/g++-8   -I/usr/local/include -I/usr/local/include/json-c  -g   -std=gnu++11 -o CMakeFiles/balanceMod.dir/socket.cpp.o -c /home/anderson/workspace/soha/olamed-modules-src/BalanceMod/socket.cpp",
+  "file": "/home/anderson/workspace/soha/olamed-modules-src/BalanceMod/socket.cpp"
+}
+]

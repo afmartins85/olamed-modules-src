@@ -1,0 +1,1 @@
+/bin/g++-8  -g   CMakeFiles/balanceMod.dir/balanceprotocol.cpp.o CMakeFiles/balanceMod.dir/dapplication.cpp.o CMakeFiles/balanceMod.dir/loguru.cpp.o CMakeFiles/balanceMod.dir/main.cpp.o CMakeFiles/balanceMod.dir/socket.cpp.o  -o balanceMod  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -ljson-c -lpthread -ldl 

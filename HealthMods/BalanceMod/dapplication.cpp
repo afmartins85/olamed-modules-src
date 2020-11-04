@@ -12,7 +12,7 @@ DApplication *DApplication::instance_ = nullptr;
 /**
  * @brief DApplication::DApplication
  */
-DApplication::DApplication() {
+DApplication::DApplication() : m_unixsigns(true) {
   m_ptr_Socket = new Socket;
   this->m_ptr_Socket->setPort(8080);
   //  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
@@ -26,7 +26,7 @@ DApplication::DApplication() {
  * @param argc
  * @param argv
  */
-DApplication::DApplication(int argc, char *argv[]) {
+DApplication::DApplication(int argc, char *argv[]) : m_unixsigns(true) {
   (void)argc;
   (void)argv;
   m_ptr_Socket = new Socket;
@@ -68,7 +68,9 @@ void DApplication::exec() {
   LOG_SCOPE_FUNCTION(INFO);
   LOG_F(INFO, "Balance Daemon Started!!");
 
-  while (true) {
+  registerUNIX_SIGNS();
+
+  while (unixsigns()) {
     if (m_sensors->isSensorOnline() == true) {
       if (m_sensors->isBalanceReady() == true) {
         m_balProto->prepare_json_balance(m_sensors->getBalance(), m_sensors->getEquipAddress());
@@ -109,6 +111,8 @@ void DApplication::exec() {
         break;
     }
   }
+
+  delete m_sensors;
 }
 
 /**
@@ -135,6 +139,33 @@ void DApplication::parseMessageReceive(const char *message) {
   } else {
     LOG_F(ERROR, "App context is null!!!");
   }
+}
+
+/**
+ * @brief DApplication::registerSIG_UNIX
+ * @param message
+ */
+void DApplication::registerUNIX_SIGNS() {
+  if ((signal(SIGINT, handlerUNIX_SIGNS) == SIG_ERR) || (signal(SIGHUP, handlerUNIX_SIGNS) == SIG_ERR) ||
+      (signal(SIGTERM, handlerUNIX_SIGNS) == SIG_ERR)) {
+    LOG_F(INFO, "Error while setting a signal handler\n");
+  }
+}
+
+/**
+ * @brief DApplication::handlerUNIX_SIGNS
+ * @param signal
+ */
+void DApplication::handlerUNIX_SIGNS(int signal) {
+  DApplication *app = getInstance();
+  LOG_SCOPE_FUNCTION(INFO);
+  if (app != nullptr) {
+    LOG_F(INFO, "UNIX Signal received: %d", signal);
+    app->setUnixsigns(false);
+  } else {
+    LOG_F(ERROR, "App context is null!!!");
+  }
+  exit(EXIT_SUCCESS);
 }
 
 /**

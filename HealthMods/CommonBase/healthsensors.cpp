@@ -5,6 +5,8 @@
  */
 HealthSensors::HealthSensors() {}
 
+HealthSensors::~HealthSensors() {}
+
 /**
  * @brief HealthSensors::getTemp
  * @return

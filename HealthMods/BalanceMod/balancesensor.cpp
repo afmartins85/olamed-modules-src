@@ -15,7 +15,8 @@ pthread_mutex_t BalanceSensor::m_balMutex(PTHREAD_MUTEX_INITIALIZER);
 typedef chrono::seconds seconds;
 typedef chrono::high_resolution_clock Clock;
 
-BalanceSensor::BalanceSensor() : m_device("/dev/ttyBALANCE"), m_ttyPort(-1), m_isReady(false), m_weight(0) {
+BalanceSensor::BalanceSensor()
+    : m_device("/dev/ttyBALANCE"), m_ttyPort(-1), m_isReady(false), m_weight(0), m_tRunning(true) {
   m_queue.clear();
 
   pthread_create(&ptid, NULL, &BalanceSensor::sensorListen, this);
@@ -27,6 +28,8 @@ BalanceSensor::BalanceSensor() : m_device("/dev/ttyBALANCE"), m_ttyPort(-1), m_i
  */
 BalanceSensor::~BalanceSensor() {
   close(m_ttyPort);
+  m_tRunning = false;
+  LOG_F(WARNING, "Destrcutor BalanceSensor");
   pthread_join(ptid, nullptr);
 }
 
@@ -44,7 +47,7 @@ void *BalanceSensor::sensorListen(void *arg) {
   pthread_setname_np(pthread_self(), __FUNCTION__);
   BalanceSensor *balance = reinterpret_cast<BalanceSensor *>(arg);
 
-  while (true) {
+  while (balance->m_tRunning) {
     pthread_mutex_lock(&m_balMutex);
     int ret = balance->read_msg_bal(data);
     if ((ret <= 0) && (data.empty())) {

@@ -30,6 +30,7 @@ class BalanceSensor : public HealthSensors {
 
   bool m_isReady;
   double m_weight;
+  bool m_tRunning;
 
   int setInterfaceAttribsPorts(int fd, int speed, int parity);
   void setBlockingPorts(int fd, int should_block);

@@ -7,6 +7,7 @@ using namespace std;
 class HealthSensors {
 public:
   HealthSensors();
+  virtual ~HealthSensors();
 
   virtual double getTemp();
   virtual bool isTempReady();

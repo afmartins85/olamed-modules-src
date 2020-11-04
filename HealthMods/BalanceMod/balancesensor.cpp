@@ -16,8 +16,18 @@ typedef chrono::seconds seconds;
 typedef chrono::high_resolution_clock Clock;
 
 BalanceSensor::BalanceSensor() : m_device("/dev/ttyBALANCE"), m_ttyPort(-1), m_isReady(false), m_weight(0) {
+  m_queue.clear();
+
   pthread_create(&ptid, NULL, &BalanceSensor::sensorListen, this);
   pthread_detach(ptid);
+}
+
+/**
+ * @brief BalanceSensor::~BalanceSensor
+ */
+BalanceSensor::~BalanceSensor() {
+  close(m_ttyPort);
+  pthread_join(ptid, nullptr);
 }
 
 /**
@@ -46,6 +56,7 @@ void *BalanceSensor::sensorListen(void *arg) {
       }
     } else {
       ctrlLogPtr = false;
+      LOG_F(INFO, "Data length %lu", data.length());
       for (size_t i = 0; i < data.length(); ++i) {
         printf("%02X ", data[i]);
       }
@@ -90,15 +101,16 @@ bool BalanceSensor::isBalanceReady() {
  */
 bool BalanceSensor::isSensorOnline() {
   pthread_mutex_lock(&m_balMutex);
-  m_ttyPort = open(m_device.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
   if (m_ttyPort < 0) {
-    LOG_F(WARNING, "Device %s is not available!", m_device.c_str());
-    pthread_mutex_unlock(&m_balMutex);
-    return false;
+    m_ttyPort = open(m_device.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+    if (m_ttyPort < 0) {
+      LOG_F(WARNING, "Device %s is not available!", m_device.c_str());
+      pthread_mutex_unlock(&m_balMutex);
+      return false;
+    }
+    setInterfaceAttribsPorts(m_ttyPort, B19200, 0);
+    setBlockingPorts(m_ttyPort, 0);
   }
-
-  setInterfaceAttribsPorts(m_ttyPort, B19200, 0);
-  setBlockingPorts(m_ttyPort, 0);
   pthread_mutex_unlock(&m_balMutex);
   return true;
 }
@@ -189,25 +201,98 @@ int BalanceSensor::read_msg_bal(string &data) {
 
   bzero(buffer, max_len + 1);
   if (m_ttyPort > 0) {
-    int n = read(m_ttyPort, buffer, max_len);
-    if (n == -1) {
-      return n;
-    }
+    do {
+      usleep(10);
+      int n = read(m_ttyPort, buffer, max_len);
+      LOG_F(INFO, "nBytes %d", n);
+      if (n == -1) {
+        return n;
+      }
 
-    data = buffer;
-    while (n > 0) {
-      bzero(buffer, max_len + 1);
-      if (0 != ioctl(m_ttyPort, FIONREAD, (int *)&n)) {
-        return -1;
+      data = buffer;
+      while (n > 0) {
+        bzero(buffer, max_len + 1);
+        if (0 != ioctl(m_ttyPort, FIONREAD, (int *)&n)) {
+          return -1;
+        }
+        if (n != 0) {
+          n = read(m_ttyPort, buffer, max_len);
+          if (n == -1) return n;
+          data += buffer;
+          LOG_F(INFO, "nBytes %d", n);
+        }
       }
-      if (n != 0) {
-        n = read(m_ttyPort, buffer, max_len);
-        if (n == -1) return n;
-        data += buffer;
+    } while (extractValidFrame(data) == false);
+
+    LOG_F(INFO, "%zu frames in queue", m_queue.size());
+    auto frame = m_queue.begin();
+    for (; frame != m_queue.end(); ++frame) {
+      for (size_t j = 0; j < frame->size(); ++j) {
+        printf("%02X ", frame.base()->at(j));
       }
+      printf("\n");
     }
+    //    m_queue.clear();
+
     return data.length();
   }
 
   return -1;
+}
+
+/**
+ * @brief BalanceSensor::extractValidFrame
+ * @param data
+ * @return
+ */
+bool BalanceSensor::extractValidFrame(string &data) {
+  string frame;
+  int startFrame = -1;
+  int endFrame = -1;
+  //  bool isEndBuffer = false;
+
+  if (data.empty() == true) {
+    return false;
+  }
+
+  for (size_t i = 0; i < data.size(); ++i) {
+    if (data[i] == 0x02) {
+      startFrame = i;
+    } else if (data[i] == 0x03) {
+      endFrame = i;
+      break;
+    }
+  }
+
+  if ((startFrame >= 0) && (endFrame >= 0)) {
+    frame = data.substr(startFrame, (endFrame - startFrame));
+  } else {
+    frame.append(data);
+  }
+
+  if (!m_queue.empty()) {
+    auto lastFrame = m_queue.end();
+    if (lastFrame->size() >= 7) {
+      if (frame[0] == 0x02) {
+        printf("NOVO FRAME\n");
+        m_queue.push_back(frame);
+      }
+    } else {
+      printf("CAI AQUI frame[%02X]\n", frame[0]);
+      lastFrame->append(frame);
+      if (lastFrame->at(lastFrame->size() - 1) == 0x03) {
+        return true;
+      }
+    }
+  } else {
+    if (frame[0] == 0x02) {
+      m_queue.push_back(frame);
+    }
+  }
+
+  data.erase(0, (!endFrame ? 1 : endFrame));
+  if (data.size() > 0) {
+    return extractValidFrame(data);
+  }
+  return false;
 }

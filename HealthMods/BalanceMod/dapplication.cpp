@@ -121,7 +121,6 @@ void DApplication::parseMessageReceive(const char *message) {
   if (app != nullptr) {
     app->m_balProto->string_parse_json_object(message);
     int type = static_cast<int>(reinterpret_cast<intptr_t>(app->m_balProto->value_json_object("type")));
-    bool reply = static_cast<bool>(reinterpret_cast<intptr_t>(app->m_balProto->value_json_object("reply")));
     switch (type) {
       case 13:
         app->m_ptr_Socket->setMessage("{ \"type\": 13, \"reply\": true }");

@@ -3,12 +3,15 @@
 
 #include <healthsensors.h>
 #include <pthread.h>
+#include <string>
+#include <vector>
 
 #define MAX_INSIDE_BUFFER_LEN 1024
 
 class BalanceSensor : public HealthSensors {
  public:
   BalanceSensor();
+  ~BalanceSensor();
   static void *sensorListen(void *arg);
 
   double getBalance() override;
@@ -22,6 +25,7 @@ class BalanceSensor : public HealthSensors {
   pthread_t ptid;
   string m_device;
   int m_ttyPort;
+  vector<string> m_queue;
   static pthread_mutex_t m_balMutex;
 
   bool m_isReady;
@@ -30,6 +34,7 @@ class BalanceSensor : public HealthSensors {
   int setInterfaceAttribsPorts(int fd, int speed, int parity);
   void setBlockingPorts(int fd, int should_block);
   int read_msg_bal(string &data);
+  bool extractValidFrame(string &data);
 };
 
 #endif  // BALANCESENSOR_H

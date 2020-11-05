@@ -55,6 +55,9 @@ class BalanceSensor : public HealthSensors {
   int read_msg_bal(string &data);
   bool extractValidFrame(string &data);
   void dataProccess(string &data);
+
+  FILE *BusDeviceDiscoveryExec();
+  string extractEntity(string str, int pos, int size);
 };
 
 #endif  // BALANCESENSOR_H

@@ -103,9 +103,26 @@ bool BalanceSensor::isSensorOnline() {
   static bool usbReset = false;
   pthread_mutex_lock(&m_balMutex);
 
+  char buff[1024];
+  std::string Bus;
+  std::string Device;
+  std::string Usb("/dev/bus/usb/");
+  Usb.append(Bus);
+  Usb.append("/");
+  Usb.append(Device);
+
+  FILE *f = BusDeviceDiscoveryExec();
+  if (f == nullptr) {
+    return false;
+  }
+
+  fgets(buff, 1024, f);
+  Bus = extractEntity(buff, 4, 3);      // 001
+  Device = extractEntity(buff, 15, 3);  // 009
+
   if (usbReset == false) {
     LOG_F(WARNING, "Resetting USB device %s...", m_device.c_str());
-    int fd = open("/dev/bus/usb/001/009", O_WRONLY);
+    int fd = open(Usb.c_str(), O_WRONLY);
     int rc = ioctl(fd, USBDEVFS_RESET, 0);
     if (rc < 0) {
       perror("Error in ioctl\n");
@@ -353,3 +370,32 @@ increaseStabilityCount:
   } else {
   }
 }
+
+/**
+ * @brief PrinterDevice::BalanceSensor
+ * @return
+ */
+FILE *BalanceSensor::BusDeviceDiscoveryExec() {
+  const char avahi[] = "lsusb | grep 16c0:06ea";
+  int fd[2];
+  int read_fd, write_fd;
+  int pid;
+
+  pipe(fd);
+  read_fd = fd[0];
+  write_fd = fd[1];
+
+  pid = fork();
+  if (pid == 0) {
+    close(read_fd);
+    dup2(write_fd, 1);
+    close(write_fd);
+    execl("/bin/sh", "sh", "-c", avahi, NULL);
+    return nullptr;
+  } else {
+    close(write_fd);
+    return fdopen(read_fd, "r");
+  }
+}
+
+string BalanceSensor::extractEntity(string str, int pos, int size) { return str.substr(pos, size); }

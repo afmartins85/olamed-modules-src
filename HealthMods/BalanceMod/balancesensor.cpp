@@ -2,6 +2,7 @@
 #include "loguru.hpp"
 #include <chrono>
 #include <fcntl.h>
+#include <linux/usbdevice_fs.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -16,7 +17,13 @@ typedef chrono::seconds seconds;
 typedef chrono::high_resolution_clock Clock;
 
 BalanceSensor::BalanceSensor()
-    : m_device("/dev/ttyBALANCE"), m_ttyPort(-1), m_isReady(false), m_weight(0), m_tRunning(true) {
+    : m_device("/dev/ttyBALANCE"),
+      m_ttyPort(-1),
+      m_isReady(false),
+      m_weight(0),
+      m_lastWeightReading(0),
+      m_stabilityCount(0),
+      m_tRunning(true) {
   m_queue.clear();
 
   pthread_create(&ptid, NULL, &BalanceSensor::sensorListen, this);
@@ -26,12 +33,7 @@ BalanceSensor::BalanceSensor()
 /**
  * @brief BalanceSensor::~BalanceSensor
  */
-BalanceSensor::~BalanceSensor() {
-  close(m_ttyPort);
-  m_tRunning = false;
-  LOG_F(WARNING, "Destrcutor BalanceSensor");
-  pthread_join(ptid, nullptr);
-}
+BalanceSensor::~BalanceSensor() {}
 
 /**
  * @brief BalanceSensor::sensorListen
@@ -47,7 +49,7 @@ void *BalanceSensor::sensorListen(void *arg) {
   pthread_setname_np(pthread_self(), __FUNCTION__);
   BalanceSensor *balance = reinterpret_cast<BalanceSensor *>(arg);
 
-  while (balance->m_tRunning) {
+  while (balance->getTRunning()) {
     pthread_mutex_lock(&m_balMutex);
     int ret = balance->read_msg_bal(data);
     if ((ret <= 0) && (data.empty())) {
@@ -59,13 +61,8 @@ void *BalanceSensor::sensorListen(void *arg) {
       }
     } else {
       ctrlLogPtr = false;
-      LOG_F(INFO, "Data length %lu", data.length());
-      for (size_t i = 0; i < data.length(); ++i) {
-        printf("%02X ", data[i]);
-      }
-      printf("\n");
+      balance->dataProccess(data);
     }
-
     pthread_mutex_unlock(&m_balMutex);
     usleep(10);
   }
@@ -103,13 +100,30 @@ bool BalanceSensor::isBalanceReady() {
  * @return
  */
 bool BalanceSensor::isSensorOnline() {
+  static bool usbReset = false;
   pthread_mutex_lock(&m_balMutex);
+
+  if (usbReset == false) {
+    LOG_F(WARNING, "Resetting USB device %s...", m_device.c_str());
+    int fd = open("/dev/bus/usb/001/009", O_WRONLY);
+    int rc = ioctl(fd, USBDEVFS_RESET, 0);
+    if (rc < 0) {
+      perror("Error in ioctl\n");
+      return false;
+    }
+    LOG_F(INFO, "Reset USB Successful!");
+    close(fd);
+    usbReset = true;
+  }
+
   if (m_ttyPort < 0) {
     m_ttyPort = open(m_device.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     if (m_ttyPort < 0) {
       LOG_F(WARNING, "Device %s is not available!", m_device.c_str());
       pthread_mutex_unlock(&m_balMutex);
       return false;
+    } else {
+      LOG_F(INFO, "File descriptor %d for %s!", m_ttyPort, m_device.c_str());
     }
     setInterfaceAttribsPorts(m_ttyPort, B19200, 0);
     setBlockingPorts(m_ttyPort, 0);
@@ -128,6 +142,20 @@ string BalanceSensor::getEquipAddress() {
   device = m_device;
   pthread_mutex_unlock(&m_balMutex);
   return device;
+}
+
+/**
+ * @brief BalanceSensor::shutdown
+ * @return
+ */
+bool BalanceSensor::shutdown() {
+  //  setTRunning(false);
+  pthread_cancel(ptid);
+  pthread_join(ptid, nullptr);
+  LOG_F(INFO, "Close %s device...", m_device.c_str());
+  int ret = close(m_ttyPort);
+  LOG_F(INFO, "%s closed result %d!", m_device.c_str(), ret);
+  return (!ret ? true : false);
 }
 
 /**
@@ -207,7 +235,6 @@ int BalanceSensor::read_msg_bal(string &data) {
     do {
       usleep(10);
       int n = read(m_ttyPort, buffer, max_len);
-      LOG_F(INFO, "nBytes %d", n);
       if (n == -1) {
         return n;
       }
@@ -222,20 +249,13 @@ int BalanceSensor::read_msg_bal(string &data) {
           n = read(m_ttyPort, buffer, max_len);
           if (n == -1) return n;
           data += buffer;
-          LOG_F(INFO, "nBytes %d", n);
         }
       }
     } while (extractValidFrame(data) == false);
 
-    LOG_F(INFO, "%zu frames in queue", m_queue.size());
-    auto frame = m_queue.begin();
-    for (; frame != m_queue.end(); ++frame) {
-      for (size_t j = 0; j < frame->size(); ++j) {
-        printf("%02X ", frame.base()->at(j));
-      }
-      printf("\n");
-    }
-    //    m_queue.clear();
+    LOG_F(9, "%zu frames in queue", m_queue.size());
+    data = m_queue[m_queue.size() - 1];
+    m_queue.clear();
 
     return data.length();
   }
@@ -274,16 +294,14 @@ bool BalanceSensor::extractValidFrame(string &data) {
   }
 
   if (!m_queue.empty()) {
-    auto lastFrame = m_queue.end();
+    string *lastFrame = &m_queue[m_queue.size() - 1];
     if (lastFrame->size() >= 7) {
       if (frame[0] == 0x02) {
-        printf("NOVO FRAME\n");
         m_queue.push_back(frame);
       }
     } else {
-      printf("CAI AQUI frame[%02X]\n", frame[0]);
       lastFrame->append(frame);
-      if (lastFrame->at(lastFrame->size() - 1) == 0x03) {
+      if (lastFrame->back() == 0x03) {
         return true;
       }
     }
@@ -298,4 +316,40 @@ bool BalanceSensor::extractValidFrame(string &data) {
     return extractValidFrame(data);
   }
   return false;
+}
+
+/**
+ * @brief BalanceSensor::dataProccess
+ * @param data
+ */
+void BalanceSensor::dataProccess(string &data) {
+  string frame = data.substr(1, data.size() - 2);
+  if (frame.compare("IIIII")) {
+    int iWeight = atoi(frame.c_str());
+    if (iWeight != 0) {
+      double curWeight = (double)iWeight / (double)100;
+      if (curWeight == m_lastWeightReading) {
+        if (m_stabilityCount == LIMIT_READING_TO_STABLE) {
+          LOG_F(WARNING, "Weight: %0.2f", curWeight);
+          m_weight = curWeight;
+          m_isReady = true;
+        }
+        m_stabilityCount++;
+      } else {
+        LOG_F(WARNING, "Weight: %0.2f", curWeight);
+        m_lastWeightReading = curWeight;
+      }
+    } else {
+      goto increaseStabilityCount;
+    }
+    return;
+  } else {
+    LOG_F(WARNING, "Undefined State - Cod. [%s]", frame.c_str());
+  }
+
+increaseStabilityCount:
+  if (m_stabilityCount > 0) {
+    m_stabilityCount--;
+  } else {
+  }
 }

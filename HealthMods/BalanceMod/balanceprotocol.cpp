@@ -20,7 +20,9 @@ void BalanceProtocol::create_json_object(struct json_object *jobj, const char *a
       // json_object_object_add(jobj, a, json_object_new_double(*((double
       // *)(b))));
       double x = *((double *)b);
-      json_object_object_add(jobj, a, json_object_new_double(x));
+      char temp[10];
+      sprintf(temp, "%0.2f", x);
+      json_object_object_add(jobj, a, json_object_new_double_s(x, temp));
       break;
     }
 

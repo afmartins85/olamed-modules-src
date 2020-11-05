@@ -102,3 +102,9 @@ double HealthSensors::getBalance() { return 0; }
  * @return
  */
 bool HealthSensors::isBalanceReady() { return false; }
+
+/**
+ * @brief HealthSensors::shutdown
+ * @return
+ */
+bool HealthSensors::shutdown() { return true; }

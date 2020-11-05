@@ -21,13 +21,24 @@ class DApplication {
   static void parseMessageReceive(const char *);
 
   static void registerUNIX_SIGNS();
-
   static void handlerUNIX_SIGNS(int signal);
 
-  inline bool unixsigns() { return m_unixsigns; }
-  inline void setUnixsigns(bool unixsigns) { m_unixsigns = unixsigns; }
+  inline bool unixsigns() {
+    bool b;
+    pthread_mutex_lock(&m_appMutex);
+    b = m_unixsigns;
+    pthread_mutex_unlock(&m_appMutex);
+    return b;
+  }
+
+  inline void setUnixsigns(bool unixsigns) {
+    pthread_mutex_lock(&m_appMutex);
+    m_unixsigns = unixsigns;
+    pthread_mutex_unlock(&m_appMutex);
+  }
 
   void exec();
+  void finishSafely();
 
  protected:
  private:
@@ -41,6 +52,7 @@ class DApplication {
   DApplication &operator=(const DApplication &);
 
   bool m_unixsigns;
+  pthread_mutex_t m_appMutex;
 };
 
 #endif

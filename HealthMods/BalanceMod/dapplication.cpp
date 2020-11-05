@@ -12,7 +12,7 @@ DApplication *DApplication::instance_ = nullptr;
 /**
  * @brief DApplication::DApplication
  */
-DApplication::DApplication() : m_unixsigns(true) {
+DApplication::DApplication() : m_unixsigns(true), m_appMutex(PTHREAD_MUTEX_INITIALIZER) {
   m_ptr_Socket = new Socket;
   this->m_ptr_Socket->setPort(8080);
   //  this->m_ptr_Socket->setAddress((char *)"10.8.0.2");
@@ -26,7 +26,7 @@ DApplication::DApplication() : m_unixsigns(true) {
  * @param argc
  * @param argv
  */
-DApplication::DApplication(int argc, char *argv[]) : m_unixsigns(true) {
+DApplication::DApplication(int argc, char *argv[]) : m_unixsigns(true), m_appMutex(PTHREAD_MUTEX_INITIALIZER) {
   (void)argc;
   (void)argv;
   m_ptr_Socket = new Socket;
@@ -112,9 +112,19 @@ void DApplication::exec() {
     }
   }
 
-  delete m_sensors;
+  finishSafely();
 }
 
+/**
+ * @brief DApplication::finishSafely
+ */
+void DApplication::finishSafely() {
+  LOG_F(WARNING, "Securely finalizing the application...");
+  m_sensors->shutdown();
+  delete m_sensors;
+  //  delete m_balProto;
+  //  delete m_ptr_Socket;
+}
 /**
  * @brief DApplication::parseMessageReceive
  * @param message
@@ -165,7 +175,6 @@ void DApplication::handlerUNIX_SIGNS(int signal) {
   } else {
     LOG_F(ERROR, "App context is null!!!");
   }
-  exit(EXIT_SUCCESS);
 }
 
 /**

@@ -26,6 +26,8 @@ public:
 
   virtual double getBalance();
   virtual bool isBalanceReady();
+
+  virtual bool shutdown();
 };
 
 #endif // HEALTHSENSORS_H
